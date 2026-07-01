@@ -1,0 +1,141 @@
+{
+  "slug": "devops-api",
+  "title": "DevOps To-Do API",
+  "tagline": "CI/CD pipeline with automated testing, containerization, and infrastructure as code.",
+  "status": "completed",
+  "featured": true,
+  "order": 1,
+  "thumbnail": "/images/projects/devops-api/thumbnail.webp",
+  "coverImage": "/images/projects/devops-api/cover.webp",
+  "timeline": {
+    "startDate": "2025-01",
+    "endDate": "2025-04",
+    "milestones": [
+      { "date": "2025-01", "label": "Project started" },
+      { "date": "2025-02", "label": "CI/CD pipeline operational" },
+      { "date": "2025-03", "label": "Dockerized + Terraform deployed" },
+      { "date": "2025-04", "label": "Monitoring with Grafana complete" }
+    ]
+  },
+  "overview": {
+    "recruiter": "A production-ready REST API with a fully automated CI/CD pipeline that reduced deployment time by 80% and eliminated manual testing errors.",
+    "developer": "Built with Spring Boot 3, automated via Jenkinsfile with multi-stage pipeline (build → test → dockerize → terraform apply → monitor). JUnit 5 for unit/integration tests, Docker multi-stage builds, Terraform for AWS provisioning, Grafana + Prometheus for observability."
+  },
+  "architecture": {
+    "diagram": [
+      {
+        "id": "github",
+        "label": "GitHub",
+        "icon": "github",
+        "x": 0,
+        "y": 0,
+        "details": {
+          "purpose": "Source code repository and webhook trigger",
+          "whyChosen": "Industry standard for version control with native webhook support for CI/CD integration",
+          "configNotes": "Webhook configured for push events to main branch. Branch protection rules enforce PR reviews.",
+          "lessonsLearned": "Branch protection rules are essential for maintaining code quality in any team workflow."
+        }
+      },
+      {
+        "id": "jenkins",
+        "label": "Jenkins",
+        "icon": "settings",
+        "x": 0,
+        "y": 1,
+        "details": {
+          "purpose": "CI/CD orchestration server",
+          "whyChosen": "Mature ecosystem with extensive plugin support. Self-hosted gives full control over pipeline configuration.",
+          "configNotes": "Jenkinsfile with declarative pipeline. Stages: Checkout → Build → Test → Docker Build → Terraform Apply → Health Check.",
+          "lessonsLearned": "Pipeline-as-code is critical. Storing Jenkinsfile in the repo ensures CI config is versioned alongside application code."
+        }
+      }
+    ],
+    "edges": [
+      { "from": "github", "to": "jenkins", "label": "Webhook Trigger" }
+    ]
+  },
+  "techStack": [
+    { "name": "Spring Boot", "category": "backend", "icon": "spring" },
+    { "name": "Docker", "category": "devops", "icon": "docker" },
+    { "name": "Terraform", "category": "infrastructure", "icon": "terraform" },
+    { "name": "Jenkins", "category": "ci-cd", "icon": "jenkins" }
+  ],
+  "challenges": [
+    {
+      "title": "Jenkins Pipeline Reliability",
+      "recruiter": "Ensuring the deployment pipeline never fails silently, reducing deployment incidents to zero.",
+      "developer": "Configured Jenkinsfile with try-catch-finally blocks, post-stage notifications via Slack webhook, and parallel test execution to reduce pipeline time from 12min to 6min."
+    }
+  ],
+  "lessonsLearned": [
+    {
+      "title": "Infrastructure as Code",
+      "recruiter": "Learned to treat infrastructure like software — versioned, reviewed, and reproducible.",
+      "developer": "Terraform state management with S3 backend + DynamoDB locking. Modularized Terraform configs for VPC, EC2, RDS. Learned to use `terraform plan` as a PR gate."
+    }
+  ],
+  "futureImprovements": [
+    "Add Kubernetes orchestration",
+    "Implement blue-green deployments",
+    "Add automated security scanning (Trivy, Snyk)"
+  ],
+  "gallery": [
+    { "src": "/images/projects/devops-api/pipeline.webp", "alt": "Jenkins pipeline stages" },
+    { "src": "/images/projects/devops-api/grafana.webp", "alt": "Grafana monitoring dashboard" }
+  ],
+  "github": {
+    "repoUrl": "https://github.com/kr-Sanket/devops-api",
+    "repoName": "kr-Sanket/devops-api"
+  },
+  "mentor": {
+    "greeting": "Ask me anything about the DevOps To-Do API!",
+    "knowledgeBase": [
+      {
+        "id": "why-jenkins",
+        "topic": "CI/CD Tool Selection",
+        "question": "Why was Jenkins chosen over GitHub Actions or GitLab CI?",
+        "answer": "Jenkins was chosen because it provides a self-hosted CI/CD solution with full control over the pipeline environment. Unlike GitHub Actions, Jenkins allows custom executor environments, which was critical for running Docker-in-Docker builds. The extensive plugin ecosystem (1800+ plugins) provided integrations for JUnit reporting, Docker, Terraform, and Slack notifications out of the box.",
+        "keywords": ["jenkins", "ci", "cd", "github actions", "pipeline", "ci/cd", "continuous integration"],
+        "category": "tooling"
+      },
+      {
+        "id": "why-docker",
+        "topic": "Containerization Strategy",
+        "question": "Why Docker? What containerization approach was used?",
+        "answer": "Docker was used to ensure environment consistency across development, testing, and production. Multi-stage builds reduce the final image size from ~800MB to ~120MB. The Dockerfile is optimized with layer caching for faster rebuilds during CI.",
+        "keywords": ["docker", "container", "containerization", "image", "dockerfile", "multi-stage"],
+        "category": "devops"
+      },
+      {
+        "id": "why-terraform",
+        "topic": "Infrastructure as Code",
+        "question": "Why Terraform for infrastructure management?",
+        "answer": "Terraform was chosen for its declarative approach to infrastructure, cloud-agnostic design, and excellent state management. The infrastructure is modularized into reusable Terraform modules for VPC, EC2, and RDS, with remote state stored in S3 and DynamoDB for locking.",
+        "keywords": ["terraform", "infrastructure", "iac", "infrastructure as code", "aws", "provisioning"],
+        "category": "infrastructure"
+      },
+      {
+        "id": "biggest-challenge",
+        "topic": "Project Challenges",
+        "question": "What was the biggest challenge in this project?",
+        "answer": "The biggest challenge was making the Jenkins pipeline reliable and idempotent. Initially, Terraform applies would occasionally fail due to state drift, and Docker builds would break due to cache invalidation issues. The solution involved implementing proper error handling in the Jenkinsfile, adding health check stages, and using Terraform plan as a gate before apply.",
+        "keywords": ["challenge", "difficult", "hard", "problem", "obstacle", "struggle"],
+        "category": "experience"
+      },
+      {
+        "id": "monitoring-setup",
+        "topic": "Observability",
+        "question": "How is the application monitored?",
+        "answer": "Grafana dashboards visualize metrics from Prometheus, which scrapes Spring Boot Actuator endpoints. Key metrics include request latency (p50/p95/p99), error rates, JVM memory usage, and API endpoint hit counts. Alerting is configured for error rate spikes and high response times.",
+        "keywords": ["monitoring", "grafana", "prometheus", "observability", "metrics", "alerting", "dashboard"],
+        "category": "devops"
+      }
+    ],
+    "fallback": "I don't have a specific answer for that. Try asking about the tech stack, CI/CD pipeline, containerization, infrastructure, challenges, or monitoring setup!"
+  },
+  "recruiterSummary": {
+    "impact": "Reduced deployment time by 80%",
+    "outcome": "Zero-downtime deployments with full observability",
+    "skills": ["CI/CD", "Docker", "Terraform", "Jenkins", "Spring Boot"]
+  }
+}

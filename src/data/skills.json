@@ -1,0 +1,29 @@
+{
+  "categories": [
+    {
+      "name": "Languages",
+      "icon": "code",
+      "skills": ["Python", "Java", "TypeScript"]
+    },
+    {
+      "name": "DevOps & Infrastructure",
+      "icon": "server",
+      "skills": ["Docker", "Kubernetes", "Terraform", "Jenkins", "AWS"]
+    },
+    {
+      "name": "Backend",
+      "icon": "database",
+      "skills": ["Spring Boot"]
+    },
+    {
+      "name": "AI & Machine Learning",
+      "icon": "brain",
+      "skills": ["TensorFlow", "OpenCV"]
+    },
+    {
+      "name": "Observability",
+      "icon": "activity",
+      "skills": ["Prometheus", "Grafana"]
+    }
+  ]
+}

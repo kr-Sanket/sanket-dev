@@ -13,33 +13,35 @@ export function ViewModeToggle() {
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          onClick={toggle}
-          className="relative flex h-9 items-center gap-0.5 rounded-full border border-border bg-muted/50 p-0.5 text-xs font-medium transition-colors cursor-pointer"
-          aria-label={`Switch to ${mode === "recruiter" ? "developer" : "recruiter"} mode`}
+      <TooltipTrigger
+        render={
+          <button
+            onClick={toggle}
+            className="relative flex h-9 items-center gap-0.5 rounded-full border border-border bg-muted/50 p-0.5 text-xs font-medium transition-colors cursor-pointer"
+            aria-label={`Switch to ${mode === "recruiter" ? "developer" : "recruiter"} mode`}
+          />
+        }
+      >
+        <span
+          className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-all duration-300 ${
+            mode === "recruiter"
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "text-muted-foreground"
+          }`}
         >
-          <span
-            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-all duration-300 ${
-              mode === "recruiter"
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "text-muted-foreground"
-            }`}
-          >
-            <Briefcase className="h-3 w-3" />
-            <span className="hidden sm:inline">Recruiter</span>
-          </span>
-          <span
-            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-all duration-300 ${
-              mode === "developer"
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "text-muted-foreground"
-            }`}
-          >
-            <Code2 className="h-3 w-3" />
-            <span className="hidden sm:inline">Developer</span>
-          </span>
-        </button>
+          <Briefcase className="h-3 w-3" />
+          <span className="hidden sm:inline">Recruiter</span>
+        </span>
+        <span
+          className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-all duration-300 ${
+            mode === "developer"
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "text-muted-foreground"
+          }`}
+        >
+          <Code2 className="h-3 w-3" />
+          <span className="hidden sm:inline">Developer</span>
+        </span>
       </TooltipTrigger>
       <TooltipContent>
         <p>

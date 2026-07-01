@@ -1,0 +1,48 @@
+{
+  "slug": "adaptive-cyber-defense",
+  "title": "Adaptive Cyber Defense System",
+  "tagline": "AI-powered adaptive cyber defense.",
+  "status": "research",
+  "featured": true,
+  "order": 3,
+  "thumbnail": "/images/projects/adaptive-cyber-defense/thumbnail.webp",
+  "coverImage": "/images/projects/adaptive-cyber-defense/cover.webp",
+  "timeline": {
+    "startDate": "2025-06",
+    "endDate": null,
+    "milestones": [
+      { "date": "2025-06", "label": "Research started" }
+    ]
+  },
+  "overview": {
+    "recruiter": "Research into an AI-powered system that adapts its defenses to evolving cyber threats.",
+    "developer": "TODO: Document the research approach, threat model, ML techniques, datasets, and findings."
+  },
+  "architecture": {
+    "diagram": [],
+    "edges": []
+  },
+  "techStack": [
+    { "name": "Python", "category": "language", "icon": "python" },
+    { "name": "Machine Learning", "category": "ml", "icon": "brain" },
+    { "name": "Network Security", "category": "security", "icon": "shield" }
+  ],
+  "challenges": [],
+  "lessonsLearned": [],
+  "futureImprovements": [],
+  "gallery": [],
+  "github": {
+    "repoUrl": "",
+    "repoName": ""
+  },
+  "mentor": {
+    "greeting": "Ask me anything about the Adaptive Cyber Defense System!",
+    "knowledgeBase": [],
+    "fallback": "I don't have a specific answer for that yet — this project is in the research phase and its knowledge base is still being built."
+  },
+  "recruiterSummary": {
+    "impact": "TODO: add measurable impact once available",
+    "outcome": "AI-powered adaptive cyber defense",
+    "skills": ["Python", "Machine Learning", "Network Security"]
+  }
+}

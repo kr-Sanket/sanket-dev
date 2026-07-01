@@ -1,0 +1,55 @@
+{
+  "events": [
+    {
+      "date": "2024-08",
+      "type": "milestone",
+      "title": "Started at VIT",
+      "description": "Began Computer Science degree at VIT",
+      "icon": "graduation-cap",
+      "relatedProject": null
+    },
+    {
+      "date": "2025-01",
+      "type": "project-start",
+      "title": "DevOps To-Do API",
+      "description": "Started building CI/CD pipeline with Jenkins, Docker, and Terraform",
+      "icon": "rocket",
+      "relatedProject": "devops-api",
+      "status": "completed"
+    },
+    {
+      "date": "2025-04",
+      "type": "project-end",
+      "title": "DevOps API Completed",
+      "description": "Full pipeline operational — automated testing, containerization, IaC, monitoring",
+      "icon": "check-circle",
+      "relatedProject": "devops-api"
+    },
+    {
+      "date": "2025-05",
+      "type": "project-start",
+      "title": "Fruit Quality Detection",
+      "description": "Started research on CNN-based fruit quality classification",
+      "icon": "microscope",
+      "relatedProject": "fruit-quality-detection",
+      "status": "in-progress"
+    },
+    {
+      "date": "2025-06",
+      "type": "achievement",
+      "title": "Senior Core Member — Geospatial Club",
+      "description": "Appointed as Senior Core Member of the Geospatial Club at VIT",
+      "icon": "award",
+      "relatedProject": null
+    },
+    {
+      "date": "2025-06",
+      "type": "project-start",
+      "title": "Adaptive Cyber Defense System",
+      "description": "Began research on AI-powered adaptive cyber defense",
+      "icon": "shield",
+      "relatedProject": "adaptive-cyber-defense",
+      "status": "research"
+    }
+  ]
+}

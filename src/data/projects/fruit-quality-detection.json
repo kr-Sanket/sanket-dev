@@ -1,0 +1,48 @@
+{
+  "slug": "fruit-quality-detection",
+  "title": "Fruit Quality Detection",
+  "tagline": "CNN-based fruit quality classification.",
+  "status": "in-progress",
+  "featured": true,
+  "order": 2,
+  "thumbnail": "/images/projects/fruit-quality-detection/thumbnail.webp",
+  "coverImage": "/images/projects/fruit-quality-detection/cover.webp",
+  "timeline": {
+    "startDate": "2025-05",
+    "endDate": null,
+    "milestones": [
+      { "date": "2025-05", "label": "Project started" }
+    ]
+  },
+  "overview": {
+    "recruiter": "A computer-vision project that classifies fruit quality from images using a convolutional neural network (CNN).",
+    "developer": "TODO: Document the model architecture, dataset, preprocessing pipeline, training setup, and evaluation metrics."
+  },
+  "architecture": {
+    "diagram": [],
+    "edges": []
+  },
+  "techStack": [
+    { "name": "Python", "category": "language", "icon": "python" },
+    { "name": "TensorFlow", "category": "ml", "icon": "tensorflow" },
+    { "name": "OpenCV", "category": "ml", "icon": "opencv" }
+  ],
+  "challenges": [],
+  "lessonsLearned": [],
+  "futureImprovements": [],
+  "gallery": [],
+  "github": {
+    "repoUrl": "",
+    "repoName": ""
+  },
+  "mentor": {
+    "greeting": "Ask me anything about the Fruit Quality Detection project!",
+    "knowledgeBase": [],
+    "fallback": "I don't have a specific answer for that yet — the knowledge base for this project is still being built."
+  },
+  "recruiterSummary": {
+    "impact": "TODO: add measurable impact once available",
+    "outcome": "CNN-based fruit quality classification",
+    "skills": ["Python", "TensorFlow", "OpenCV"]
+  }
+}

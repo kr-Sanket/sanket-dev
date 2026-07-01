@@ -1,0 +1,11 @@
+{
+  "certifications": [
+    {
+      "title": "AWS Certified Cloud Practitioner",
+      "issuer": "Amazon Web Services",
+      "date": "",
+      "image": "/images/certifications/aws-cloud-practitioner.webp",
+      "url": ""
+    }
+  ]
+}

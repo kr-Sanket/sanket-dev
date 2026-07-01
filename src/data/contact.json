@@ -1,0 +1,28 @@
+{
+  "links": [
+    {
+      "platform": "GitHub",
+      "url": "https://github.com/kr-Sanket",
+      "icon": "github",
+      "label": "github.com/kr-Sanket"
+    },
+    {
+      "platform": "LinkedIn",
+      "url": "https://linkedin.com/in/sanketkumar",
+      "icon": "linkedin",
+      "label": "linkedin.com/in/sanketkumar"
+    },
+    {
+      "platform": "Email",
+      "url": "mailto:sanket@example.com",
+      "icon": "mail",
+      "label": "sanket@example.com"
+    },
+    {
+      "platform": "Resume",
+      "url": "/resume.pdf",
+      "icon": "file-text",
+      "label": "Download Resume"
+    }
+  ]
+}
