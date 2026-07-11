@@ -408,6 +408,208 @@ None.
 - Project image assets (`public/images/**`) still absent, so galleries currently render the placeholder by design.
 - Interactive Architecture Viewer, Project Mentor, and the recruiter route remain Phase 4+.
 
+## 16. Milestone 4.3 — Skills Section (2026-07-11)
+
+**Scope:** the Skills homepage section + a reusable `SkillCategory` card only. No Timeline, no changes to project pages / Hero / Dashboard / Featured Projects, no integration work. **Status: ✅ complete — repo green.**
+
+### Files created (2)
+- `src/components/shared/SkillCategory.tsx` — reusable, presentational category card: icon + title (`<h3>`) + optional description (only shown when data provides one) + a wrapping `<ul>` of technology chips. Takes a resolved `LucideIcon` (same contract as `MetricCard`); chips reuse the project tech-stack `Badge` styling (`secondary`, `font-mono`) for a consistent system. Single subtle ring-lift hover.
+- `src/sections/Skills.tsx` — server section; reads `getSkills()` and renders one `SkillCategory` per category in a responsive grid (1 → 2 → 3 cols). Maps icon-name strings → lucide components with a generic fallback (`Cpu`). Renders `null` when there are no categories.
+
+### Files modified (1)
+- `src/app/page.tsx` — mounts `<Skills />` directly after `<FeaturedProjects />`. No other homepage changes.
+
+### Design decisions
+- **100% data-driven, no invention:** categories, icons, and technologies all come from `skills.json` via `getSkills()`. `skills.json`'s `SkillCategory` type has **no description and no proficiency field**, so — per the brief — neither is displayed or fabricated. `SkillCategory` accepts an optional `description` for forward-compat, but the section passes none today.
+- **Pure server component:** skills content isn't dual-mode, so no client island is needed (unlike the project overview / `DualModeText`).
+- **Reuse over new UI:** built on `Container`, `SectionHeader` (its `<h2>`), `Card`, and `Badge`; icon-name→lucide mapping follows the existing `EngineeringDashboard` pattern.
+- **Responsive, no overflow:** `flex flex-wrap gap-1.5` chips wrap cleanly; the grid collapses to a single column on mobile. No gradients, glassmorphism, or animation beyond the shared hover; reduced-motion-safe.
+- **Accessibility:** section `<h2>` → category `<h3>`; technologies are a semantic `<ul>`/`<li>` list; the category icon is decorative (`aria-hidden`); no interactive elements added, so keyboard behavior is unchanged.
+
+### Validation
+- **`npm run lint`** → exit 0, clean ✅
+- **`npm run build`** → exit 0; `/` prerendered (7 static routes total, unchanged set) ✅
+- **Rendered-HTML checks:** all 5 categories present; **each of the 13 technologies appears exactly once within the `#skills` section** (no duplication); content matches `skills.json` exactly. ✅
+
+### Notes / remaining work
+- No proficiency indicator — intentionally omitted (not in the data). If proficiency is added to `skills.json` + the `SkillCategory` type later, the card can surface it without a section rewrite.
+- Engineering Timeline is the next homepage section (see `ROADMAP.md`).
+
+## 17. Milestone 4.4 — Engineering Timeline (2026-07-11)
+
+**Scope:** the Engineering Timeline homepage section + a reusable `TimelineItem` only. No changes to Hero / Dashboard / Featured Projects / Skills / project pages; no GitHub or Recruiter-View work. **Status: ✅ complete — repo green.**
+
+### Files created (2)
+- `src/components/shared/TimelineItem.tsx` — reusable, presentational timeline entry: a marker dot on the rail + a `Card` with date (`<time>`), icon, humanized type badge, title (`<h3>`), description, and an optional related-project link. Alternates left/right at `lg`+ via a `side` prop; stacks to a single left-rail column below. Per-type accent (dot + quiet text) keyed off the **real** `TimelineEventType` union — no invented types. No motion; reduced-motion-safe.
+- `src/sections/EngineeringTimeline.tsx` — async server section. Reads `getTimeline()`, sorts events chronologically (`YYYY-MM` lexical, stable), maps icon-name → lucide (fallback `GitCommitHorizontal`), and renders `TimelineItem`s inside an `<ol role="list">` with a decorative center/left rail. Also loads `getProjects()` + `getProjectSlugs()` so a related event shows the real project **title** and links to its detail page **only when a page exists** (planned projects have none).
+
+### Files modified (1)
+- `src/app/page.tsx` — mounts `<EngineeringTimeline />` directly after `<Skills />`. No other homepage changes.
+
+### Design decisions
+- **100% data-driven, no invention:** every event's date/type/title/description/icon/related-project comes from `timeline.json` via `getTimeline()`. Event-type accents/labels are keyed off the actual union (`project-start`, `project-end`, `milestone`, `achievement`, `learning`) — the brief's example list (project/leadership/research) was **not** used because those aren't the types in the data.
+- **Layout:** alternating cards around a centered rail on `lg`+ (CSS grid, `grid-cols-2` + `gap-x-12`, marker on the center line); a single left-rail stacked column below `lg`. No horizontal scroll, no overflow (each card is bounded by its grid column; text/badges wrap).
+- **Ordering:** oldest → newest, matching the authored data; `sort` is stable so the two same-month (`2025-06`) events keep authored order.
+- **Graceful fields:** description renders only when present; related-project renders only when set, and only as a link when a detail page exists (else a plain label). Pure server component — timeline content isn't dual-mode.
+- **Reuse + accessibility:** built on `Container`, `SectionHeader` (`h2`), `Card`, `Badge`, theme tokens, and the established icon-map pattern. Semantic `<ol>/<li>` structure with `role="list"`, `h2` → `h3` hierarchy, `<time dateTime>` for dates, keyboard-accessible related links (`next/link`), and `aria-hidden` on the rail and marker dots. No gradients/glassmorphism.
+
+### Validation
+- **`npm run lint`** → exit 0, clean ✅
+- **`npm run build`** → exit 0; `/` prerendered (7 static routes total, unchanged set) ✅
+- **Rendered-HTML checks:** all 6 events present; chronological order verified (`2024-08 → 2025-01 → 2025-04 → 2025-05 → 2025-06 → 2025-06`); type badges humanized (`Milestone`, `Project Start`, `Project End`, `Achievement`); related links point to `/projects/*` and display the resolved project title; decorative elements are `aria-hidden`. ✅
+
+### Notes / remaining work
+- `learning` and `project`/`leadership`/`research` styles: `learning` has an accent defined for forward-compat though no `learning` event exists yet; the brief's other example types aren't in the union and were intentionally not added.
+- About is the next homepage section (see `ROADMAP.md`).
+
+## 18. Milestone 4.5 — About Section (2026-07-11)
+
+**Scope:** the About homepage section only. No changes to Hero / Dashboard / Featured Projects / Skills / Timeline / project pages; no Leadership or Contact work. **Status: ✅ complete — repo green.**
+
+### Files created (1)
+- `src/sections/About.tsx` — read-optimized bio + highlights, driven entirely by `getAbout()`. Pure server component (About content isn't dual-mode). Two-column on `lg`+ (bio left at a comfortable measure, highlights right); stacked on mobile (bio then highlights). Highlights are a semantic `<ul>` of compact `Card`s, each with a decorative check icon.
+
+### Files modified (1)
+- `src/app/page.tsx` — mounts `<About />` directly after `<EngineeringTimeline />`. No other homepage changes.
+
+### Design decisions
+- **100% data-driven, no invention:** bio and highlights come from `about.json` via `getAbout()`. The `AboutData` model is `{ bio, highlights }` — there is **no** personal-interests or closing-statement field, so (per the brief's "only if already present" / "never invent content") neither is rendered. Every field is guarded so an empty value hides gracefully; the section returns `null` if both are empty.
+- **Readability over decoration:** bio is `text-lg leading-relaxed` capped at `max-w-2xl` (~comfortable line length); generous whitespace; no oversized graphics. Highlights use small check-marked cards rather than large tiles.
+- **Reuse:** built on `Container`, `SectionHeader` (its `<h2>`), and `Card`; theme tokens and the established spacing/typography. No `Badge` used (highlights read better as check-marked rows). No gradients/glassmorphism; only the shared ring-lift hover.
+- **Accessibility:** section `<h2>` → a subtle `<h3>` "Highlights"; highlights are a real `<ul>/<li>` list; paragraph bio; decorative check icons are `aria-hidden`; no interactive elements added, so keyboard behavior is unchanged.
+
+### Validation
+- **`npm run lint`** → exit 0, clean ✅
+- **`npm run build`** → exit 0; `/` prerendered (7 static routes total, unchanged set) ✅
+- **Rendered-HTML checks:** full bio rendered verbatim from JSON; all 4 highlights present; header present; structure is 1 `<h3>` + a 4-item `<ul>`; decorative icons `aria-hidden`. ✅
+
+### Notes / remaining work
+- No interests/closing-statement — intentionally omitted (not in the data/type). If added to `about.json` + `AboutData` later, the section can surface them with guards, no rewrite.
+- Leadership is the next homepage section (see `ROADMAP.md`).
+
+## 19. Milestone 4.6 — Leadership Section (2026-07-11)
+
+**Scope:** the Leadership homepage section only. No changes to any previously completed section or component; no Certifications/Contact work. **Status: ✅ complete — repo green.**
+
+### Files created (1)
+- `src/sections/Leadership.tsx` — role cards driven entirely by `getLeadership()`. Pure server component (leadership content isn't dual-mode). Responsive grid (1 → 2 → 3 cols) matching Skills; each card shows an icon + title (`<h3>`), a `period` badge, a joined `organization · institution` affiliation line, and the description — every field guarded so empties hide gracefully. Returns `null` when there are no roles.
+
+### Files modified (1)
+- `src/app/page.tsx` — mounts `<Leadership />` directly after `<About />`. No other homepage changes.
+
+### Reuse decision
+- **No new shared component.** Per the "prefer reuse" directive, the role card is composed inline from the existing `Card` + `Badge` primitives (same header/icon/grid language as `SkillCategory`/`ProjectCard`). A single-purpose card used only in this section offered no architectural benefit as a standalone shared component.
+
+### Design decisions
+- **100% data-driven, no invention:** title/organization/institution/period/description all come from `leadership.json` via `getLeadership()`. Affiliation is `[organization, institution].filter(Boolean).join(" · ")`, so a missing side collapses cleanly; period renders only when present.
+- **Visually complements Skills/About/Timeline:** same `Card` grid, the muted rounded icon box (`Users`), the `SectionHeader` `h2`, and shared spacing/typography. `period` uses an outline mono `Badge` consistent with the timeline/date styling. No gradients/glassmorphism; only the shared ring-lift hover.
+- **Accessibility:** section `<h2>` → role `<h3>`; readable card layout; decorative icon `aria-hidden`; responsive with no overflow (grid columns bound each card; text wraps).
+
+### Validation
+- **`npm run lint`** → exit 0, clean ✅
+- **`npm run build`** → exit 0; `/` prerendered (7 static routes total, unchanged set) ✅
+- **Rendered-HTML checks:** all fields of the role rendered from JSON; affiliation joined as `Geospatial Club · VIT`; header + eyebrow present (ampersand HTML-escaped); one `<h3>` role title; decorative icon `aria-hidden`. ✅
+
+### Notes / remaining work
+- Certifications is the next homepage section (see `ROADMAP.md`).
+
+## 20. Milestone 4.7 — Certifications Section (2026-07-11)
+
+**Scope:** the Certifications homepage section only. No changes to any previously completed section or component; no Contact work. **Status: ✅ complete — repo green.**
+
+### Files created (1)
+- `src/sections/Certifications.tsx` — cert cards driven entirely by `getCertifications()`. Pure server component. Responsive grid (1 → 2 → 3 cols) matching Skills/Leadership; each card shows an image (or placeholder), title (`<h3>`), issuer, a `date` badge, and a "View credential" link. Every field guarded so missing values hide gracefully; returns `null` when there are no certs.
+
+### Files modified (1)
+- `src/app/page.tsx` — mounts `<Certifications />` directly after `<Leadership />`. No other homepage changes.
+
+### Reuse decision
+- **No new shared component.** Per the "prefer reuse" directive, cards are composed inline from existing `Card` + `Badge` + `buttonVariants`, and image existence uses the same build-time `existsSync` guard established by the project-detail gallery (Milestone 4.2). A single-purpose card offered no architectural benefit as a standalone shared component.
+
+### Design decisions
+- **100% data-driven, no invention:** title/issuer/date/image/url all come from `certifications.json` via `getCertifications()`.
+- **Graceful sparse-data handling (the milestone's core):**
+  - **Missing image file →** a tasteful placeholder panel (`aspect-video`, muted bg, centered `Award` icon) — never a broken image. The `image` path is checked against `public/` at build with `existsSync`; the current cert's asset doesn't exist yet, so the placeholder renders.
+  - **Empty `date` →** the date `Badge` is not rendered.
+  - **Empty `url` →** the "View credential" button is not rendered.
+  - No `TODO`/placeholder strings ever surface (verified in the rendered HTML).
+- **Visual consistency (checklist verified):** section rhythm `py-16 sm:py-20` + header `mb-8`; grid `gap-4` at `1→2→3` cols; `Card` `rounded-xl`; `SectionHeader` `h2` → card `h3 font-heading text-base font-semibold`; shared `hover:ring-foreground/20`; image-flush card uses `p-0/gap-0` outer + `p-5/gap-3` inner content (same convention as `ProjectCard`/gallery). No gradients/glassmorphism.
+- **Accessibility:** `h2` → `h3` hierarchy; real images get descriptive alt (`"{title} — {issuer} certificate"`); the placeholder icon is `aria-hidden`; the credential link is keyboard-accessible with `rel="noopener noreferrer"`; responsive with no overflow.
+
+### Validation
+- **`npm run lint`** → exit 0, clean ✅
+- **`npm run build`** → exit 0; `/` prerendered (7 static routes total, unchanged set) ✅
+- **Rendered-HTML checks:** title + issuer rendered from JSON; no broken image (absent file → placeholder panel); empty URL → no credential button; no `TODO` text; header present; one `<h3>`. ✅
+
+### Notes / remaining work
+- When the cert image (`public/images/certifications/…`) and the AWS `date`/`url` are added to the data/assets, the card upgrades automatically (real image, date badge, credential button) with no code change.
+- Contact is the next homepage section (see `ROADMAP.md`).
+
+## 21. Milestone 4.8 — Contact Section (2026-07-11)
+
+**Scope:** the Contact homepage section only — the final homepage section. No changes to any previously completed section or component; no GitHub-integration work. **Status: ✅ complete — repo green. 🏁 Homepage complete.**
+
+### Files created (1)
+- `src/sections/Contact.tsx` — closing-CTA section, driven entirely by `getContact()`. Pure server component. Renders every link as a card (platform icon + platform `<h3>` + label + external-link button) in a responsive grid (1 → 2 → 4 cols). Returns `null` when there are no links.
+
+### Files modified (1)
+- `src/app/page.tsx` — mounts `<Contact />` directly after `<Certifications />`. **This completes the homepage** (Hero → Dashboard → Featured Projects → Skills → Timeline → About → Leadership → Certifications → Contact). No other homepage changes.
+
+### Reuse decision
+- **No new shared component.** Cards are composed inline from existing `Card` + `buttonVariants`, and the icon mapping reuses the **Footer's** established `ICON_MAP` + `?? ExternalLink` fallback pattern. No architectural benefit to a standalone component.
+
+### Design decisions
+- **100% data-driven, no invention:** platform/url/icon/label all come from `contact.json` via `getContact()`. No closing prose is invented — the section uses an eyebrow + title header only (matching the description-less headers already used by Dashboard/Leadership/Certifications), since `contact.json` has no copy field.
+- **Icon fallback (verified):** `github`/`linkedin` are **not** exported by the installed lucide-react (brand glyphs removed — see ADR/Footer note), so they are intentionally not imported/mapped and fall back to `ExternalLink`; any unknown icon name does too. The build passes without importing the removed glyphs.
+- **Scheme-aware link semantics (generic UI copy, not fabricated content):** `http` → "Visit" + `ArrowUpRight`, opens in a new tab with `target="_blank" rel="noopener noreferrer"`; `mailto:` → "Send email" + `Mail` (same tab, no rel); local (`/resume.pdf`) → "Download" + `Download` (same tab). Buttons carry an `aria-label` (`"{cta} — {platform}"`).
+- **Visual consistency (checklist verified):** section rhythm `py-16 sm:py-20` + header `mb-8`; `Card` `rounded-xl`; `SectionHeader` `h2` → card `h3 font-heading text-base font-semibold`; icon box `size-8` / icon `size-4`; shared `hover:ring-foreground/20`; `gap-4` grid. The closing band uses `lg:grid-cols-4` (fits the 4 links on one row — the same 4-col precedent as the Engineering Dashboard). No gradients/glassmorphism.
+- **Accessibility:** `h2` → `h3` hierarchy; platform icons `aria-hidden`; descriptive link `aria-label`s; keyboard-accessible; external links use `rel="noopener noreferrer"`; responsive with no overflow (`break-words` on long labels).
+
+### Validation
+- **`npm run lint`** → exit 0, clean ✅
+- **`npm run build`** → exit 0; `/` prerendered (7 static routes total, unchanged set) ✅
+- **Rendered-HTML checks:** all 4 links (platform + label + url) rendered from JSON; exactly 2 external links carry `rel="noopener noreferrer"` (GitHub, LinkedIn); `mailto`/local resume are non-external; CTAs "Visit"/"Send email"/"Download" present; 4 `<h3>` platform headings; header present. ✅
+
+### Notes / remaining work
+- Email (`sanket@example.com`) and the `resume.pdf` asset remain owner placeholders (per Milestone 1.5); links render correctly and upgrade automatically when the real values/assets land — no code change.
+- **Homepage is feature-complete.** Next is Phase 5 integrations (GitHub Hub, Coding Profiles) and the unique features — see `ROADMAP.md`.
+
+## 22. Milestone 5.1 — GitHub Hub (Live Integration) (2026-07-11)
+
+**Scope:** the GitHub Hub feature only (first Phase 5 live integration). No Coding Profiles / Recruiter View / Architecture Viewer / Project Mentor work; no changes to completed sections. **Status: ✅ complete — repo green, live data verified.**
+
+### Files created (6, under `src/features/github/`)
+- `github.service.ts` — reusable, server-only data service. `getGitHubData(): Promise<GitHubData>` fetches repos + public events (REST) and the contribution calendar (GraphQL, token-gated) concurrently, maps raw → typed domain models, aggregates primary languages, and **never throws** (returns a typed empty `GitHubData` on any failure). Also exports `totalStars`, `isGitHubDataEmpty`, and `formatShortDate`. Username is read **only** from `siteConfig.githubUsername`.
+- `RepoCard.tsx`, `LanguageBar.tsx`, `ActivityFeed.tsx`, `ContributionHeatmap.tsx` — presentational feature components (all server components).
+- `GitHubHub.tsx` — async server section that orchestrates the above; profile summary **reuses the shared `MetricCard`**; each sub-block hides when empty; full-failure shows a graceful placeholder.
+
+### Files modified (1)
+- `src/app/page.tsx` — mounts `<GitHubHub />` after `<Contact />`. No other homepage changes.
+
+### Repository-health / reuse decisions
+- **Reused:** `MetricCard` (summary tiles), `Container`, `SectionHeader`, `Card`, `buttonVariants`, `cn`, and `siteConfig`. No duplicate stat-tile or layout component was introduced.
+- **New abstractions (justified):** there was no GitHub code to extend, so a feature `github.service.ts` (encapsulates fetch/ISR/mapping/fallback) and the presentational components are net-new. `formatShortDate` lives in the service and is reused by `RepoCard` + `ActivityFeed`; no shared date util existed to reuse (the component-local `formatMonth` handles `YYYY-MM`, not ISO timestamps), so a feature-scoped helper is correct rather than a premature shared util.
+- **Types unchanged:** `src/types/github.ts` was **not** modified. `GitHubData` has no `profile` field, so the "profile summary" is derived from the typed data (repo count, total stars, language count, contributions when available) — no type redesign.
+
+### Architectural decisions
+- **ISR per ADR-011 (Next 16 verified in `node_modules/next/dist/docs/`):** `fetch` is uncached by default; each request sets `next: { revalidate: 3600 }`. This scopes revalidation to the feature — the build now reports `/` with **Revalidate 1h** (ISR) while the homepage change stays limited to mounting the section. Cache Components is **not** enabled, so the "previous model" (`next.revalidate`) applies.
+- **Auth-optional:** `GITHUB_TOKEN` is used when present (higher rate limits; unlocks the GraphQL contribution calendar). Without it, REST endpoints still work and `contributions` is `null` → the heatmap and its tile hide gracefully. No token is committed.
+- **Graceful fallback, no fabrication:** on any failure the service returns an empty `GitHubData` (the fallback shape from `github.ts`); `GitHubHub` detects this via `isGitHubDataEmpty` and renders an "unavailable" placeholder with a profile link — never zeros, never broken layout, never fake stats.
+- **Server components only:** no client islands (no interactivity required).
+
+### Validation
+- **`npm run lint`** → exit 0, clean ✅
+- **`npm run build`** → exit 0; `/` prerendered as **ISR (Revalidate 1h)**; 7 routes total ✅
+- **Live data verified (sandbox had network):** real repos rendered for `kr-Sanket` (`sanket-dev`, `Adaptive-Firewall-System`, `Hot_Reload`, `java-todo-api`), plus Repositories/Total Stars/Languages tiles, language legend, and Recent Activity. Contributions tile/heatmap correctly **absent** (no token). Username sourced from `siteConfig`; external links carry `rel="noopener noreferrer"`. ✅
+- **Fallback path** implemented and correct (placeholder + profile link); not triggered here because the live fetch succeeded.
+
+### Notes / remaining limitations
+- **Contribution heatmap requires `GITHUB_TOKEN`** (GraphQL-only); hidden until one is configured in the deploy environment.
+- **Language stats** are computed from each repo's *primary* language (repo counts), not per-repo byte breakdowns — accurate and honest, but coarser than GitHub's byte-level stats (would need N extra `/languages` calls).
+- **Repo/star counts** reflect fetched non-fork public repos (one 100-item page — sufficient for this profile).
+- Live values are baked at build and refresh on the 1h ISR cycle.
+- Coding Profiles is the next milestone (see `ROADMAP.md`).
+
 ## 7. See Also
 
 - `ROADMAP.md` — single source of truth for milestone progress

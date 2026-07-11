@@ -12,18 +12,26 @@
 - **Application Shell (2)** — `layout.tsx` with Inter + JetBrains Mono, providers mounted, `Navbar` / `<main>` / `Footer`.
 - **Hero + Engineering Dashboard (3.1, 3.2)** — live on `/`, refined.
 - **Featured Projects (4.1)** — reusable `ProjectCard` + `StatusBadge`, data-driven from the content layer.
+- **Project Detail Pages (4.2)** — SSG `/projects/[slug]` via `generateStaticParams` + `dynamicParams=false`; status-aware, graceful section hiding; `ProjectCard` CTAs activated.
+- **Skills (4.3)** — `Skills` section + reusable `SkillCategory` card, driven entirely by `getSkills()`.
+- **Engineering Timeline (4.4)** — `EngineeringTimeline` section + reusable `TimelineItem` (alternating center rail on desktop, stacked on mobile), driven entirely by `getTimeline()`.
+- **About (4.5)** — `About` section (read-optimized bio + highlights), driven entirely by `getAbout()`.
+- **Leadership (4.6)** — `Leadership` section (role cards), driven entirely by `getLeadership()`.
+- **Certifications (4.7)** — `Certifications` section (cert cards with graceful image/date/url handling), driven entirely by `getCertifications()`.
+- **Contact (4.8)** — `Contact` closing section (link cards, icon fallback, scheme-aware CTAs), driven entirely by `getContact()`.
+- **🏁 Homepage — COMPLETE.** All homepage sections shipped: Hero, Engineering Dashboard, Featured Projects, Skills, Engineering Timeline, About, Leadership, Certifications, Contact. (Current-mission content is surfaced in the Hero status panel via `getMission()`, so no separate section is needed.)
+- **GitHub Hub (5.1)** — live, ISR-cached (`revalidate=3600`) GitHub section under `src/features/github/`: reusable `github.service.ts`, profile summary, repo cards, language usage, activity feed, and a token-gated contribution heatmap; graceful fallback placeholder on API failure.
 - **Theme switching** and **Recruiter/Developer view mode** — both working (toggles in `Navbar`).
 - **Documentation Synchronization** — docs reconciled with the repository.
 
 ## 🚧 Current Milestone
 
-- **Phase 2 — Homepage Sections (continuation).** Next up: **Engineering Timeline**, then the remaining sections. Awaiting owner approval before starting.
+- **Coding Profiles (Phase 5)** — LeetCode/CodeChef/HackerRank stats via ISR (~6h) with JSON fallbacks. Awaiting owner approval before starting.
 
 ## 📋 Next Milestones
 
-- Remaining homepage sections: Timeline, Current Mission, Skills, Leadership, Certifications, About, Contact.
-- **Phase 3 — Project Detail Pages** (`/projects/[slug]` via `generateStaticParams`); activate `ProjectCard` CTAs.
-- Shared components still needed: `AnimatedCounter`, `ScrollReveal`, `TimelineItem`.
+- **Recruiter View** (`/recruiter`, `noindex`) and the unique features (Project Mentor, Architecture Viewer).
+- Shared components still needed: `AnimatedCounter`, `ScrollReveal`.
 
 ## 🔮 Future
 
