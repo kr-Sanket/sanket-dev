@@ -377,6 +377,37 @@ None.
 - **`npm run lint`** → exit 0, clean ✅
 - **`npm run build`** → exit 0; compiled, TypeScript passed, `/` prerendered ✅
 
+## 15. Milestone 4.2 — Project Detail Pages (2026-07-11)
+
+**Scope:** SSG project detail pages at `/projects/[slug]` + activating the homepage `ProjectCard` CTAs. No interactive Architecture Viewer, no other sections, no component redesign. **Status: ✅ complete — repo green.**
+
+### Files created (2)
+- `src/app/projects/[slug]/page.tsx` — fully data-driven SSG detail page. `generateStaticParams()` reuses `getProjectSlugs()` (excludes `planned`); `export const dynamicParams = false` makes any non-generated slug (incl. `planned`) a 404; `generateMetadata()` uses `createProjectMetadata()`. Server component with a defensive `notFound()` guard (`!project || status === "planned"`). Sections: Hero (back-link, status badge, title, tagline, status note, tech stack, GitHub link when present), Overview, Architecture (static, node cards + connection list — **not** the interactive viewer), Challenges, Lessons Learned, Future Improvements, Timeline, Gallery. Empty sections are hidden gracefully.
+- `src/components/shared/DualModeText.tsx` — the one client island: renders recruiter/developer copy from a `DualModeContent` pair via `useViewMode()`. Falls back to the other mode when the active one is a `TODO`/empty placeholder, so raw TODOs are never shown. Reused by Overview, Challenges, and Lessons.
+
+### Files modified (2)
+- `src/sections/FeaturedProjects.tsx` — passes `href={ROUTES.project(project.slug)}` to each `ProjectCard`, activating navigation to the new detail pages.
+- `src/components/shared/ProjectCard.tsx` — CTA label text only: linked CTA now reads **"View Case Study"** (the no-`href` placeholder branch is unchanged). No structural/redesign changes.
+
+### Design decisions
+- **Next.js 16 route conventions (per AGENTS.md, verified in `node_modules/next/dist/docs/`):** `params` is `Promise<{ slug }>` and awaited; `generateStaticParams` returns `{ slug }[]`; `dynamicParams = false` is the hard guarantee that `planned` projects never render.
+- **100% data-driven:** every value comes from project JSON via the existing loaders/`content.ts`; no hardcoded project content. Status-note and gallery-placeholder copy are UI text keyed off `status`, not per-project data.
+- **Status behavior:** `completed` → full page; `in-progress` → full page + a "Work in Progress" note; `research` → partial page (empty sections auto-hide) + an "Active research" note; `planned` → never generated.
+- **Architecture (static only):** node cards (label + purpose + why-chosen) and a `from → to — label` connection list, resolving node ids to labels. No interactive viewer (deferred to Phase 4). Hidden entirely when `diagram` is empty.
+- **Gallery without broken images:** a build-time `existsSync` check under `public/` filters gallery entries to files that actually exist; if none do (current state — no assets yet), a tasteful dashed placeholder renders instead. Uses `next/image` for any real images.
+- **Reuse + accessibility:** built on `Container`, `SectionHeader` (h2), `StatusBadge`, `Card`, `Badge`, `buttonVariants`, and theme tokens. Heading hierarchy is single `h1` (title) → `h2` (sections) → `h3` (nodes/challenges/lessons); links are keyboard-accessible; decorative icons/markers are `aria-hidden`; external GitHub link uses `rel="noopener noreferrer"`. No gradients/glassmorphism/flashy motion.
+
+### Validation
+- **`npm run lint`** → exit 0, clean ✅
+- **`npm run build`** → exit 0; **7 static routes** prerendered, including SSG `/projects/[slug]` for all 3 non-`planned` projects (`devops-api`, `fruit-quality-detection`, `adaptive-cyber-defense`) ✅
+- **Rendered-HTML checks:** completed page shows all sections + architecture connections + GitHub link; research page correctly hides Architecture/Challenges/Lessons/Future and shows the research note + gallery placeholder; in-progress page shows the Work-in-Progress note; homepage CTAs now link to `/projects/*` and read "View Case Study". ✅
+- **Planned exclusion:** guaranteed by `getProjectSlugs()` (filters `planned`) + `dynamicParams = false`; no `planned` project exists in the data today, so none is built.
+
+### Notes / remaining work
+- No `not-found.tsx` yet — non-generated slugs use Next's default 404 (custom 404 is Phase 6).
+- Project image assets (`public/images/**`) still absent, so galleries currently render the placeholder by design.
+- Interactive Architecture Viewer, Project Mentor, and the recruiter route remain Phase 4+.
+
 ## 7. See Also
 
 - `ROADMAP.md` — single source of truth for milestone progress

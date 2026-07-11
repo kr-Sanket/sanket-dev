@@ -98,7 +98,7 @@ export function ProjectCard({ project, href, className }: ProjectCardProps) {
             href={href}
             className="group/cta inline-flex items-center gap-1.5 text-sm font-medium text-foreground transition-colors hover:text-primary"
           >
-            View project
+            View Case Study
             <ArrowRight className="size-4 transition-transform group-hover/cta:translate-x-0.5" />
           </Link>
         ) : (
