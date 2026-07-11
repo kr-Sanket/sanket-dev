@@ -6,17 +6,17 @@
 
 ---
 
-## ADR-001 — Next.js 16 instead of the planned 15  ⚠️❓
+## ADR-001 — Next.js 16 instead of the planned 15  ✅
 
 **Context.** The plan specifies Next.js 15. `package.json` pins `next@16.2.7` (with `eslint-config-next@16.2.7`), React `19.2.4`.
 
-**Decision (de-facto).** Build on Next.js 16.
+**Decision.** **Accepted:** build on Next.js 16. Multiple milestones (Application Shell, Hero, Dashboard, Featured Projects) have shipped on 16 with a green lint/build, so this is the settled project baseline.
 
 **Consequences.**
 - App Router, metadata, caching/ISR, and `generateStaticParams` APIs may differ from Next 15 docs and from model training data. `AGENTS.md` explicitly warns "This is NOT the Next.js you know" and mandates reading `node_modules/next/dist/docs/` before writing code.
 - Plan sections that cite Next 15 behavior (ISR defaults, route handlers) must be validated against installed docs, not assumed.
 
-**Action.** Treat the installed version as authoritative; keep the plan's *intent* but verify each App Router API against local docs. Owner to confirm staying on 16.
+**Action.** Treat the installed version as authoritative; keep the plan's *intent* but verify each App Router API against local docs.
 
 ---
 
@@ -53,7 +53,7 @@
 
 **Decision.** Keep providers as dedicated client components under `src/components/providers/` (`ThemeProvider.tsx`, `ViewModeProvider.tsx`).
 
-**Consequences.** Cleaner separation; keeps `layout.tsx` server-friendly. **Open item:** neither provider is mounted in `layout.tsx` yet, so they're currently inert (see IMPLEMENTATION_STATUS §6).
+**Consequences.** Cleaner separation; keeps `layout.tsx` server-friendly. **Resolved (Milestone 2):** both providers are now mounted in `layout.tsx` (`ThemeProvider` → `ViewModeProvider`), and the `ThemeToggle`/`ViewModeToggle` render in the `Navbar` — theme switching and Recruiter/Developer view mode are live.
 
 ---
 
@@ -125,6 +125,7 @@
 
 ## Open Confirmations (❓)
 
-- **ADR-001:** Stay on Next.js 16? (Plan written for 15.)
 - **ADR-003:** Accept neutral/grayscale tokens, or restore the planned blue primary accent?
 - Owner contact email and `resume.pdf` are still placeholders.
+
+_(Resolved: **ADR-001** — Next.js 16 accepted as the project baseline; **ADR-004** — providers mounted.)_

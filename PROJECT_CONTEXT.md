@@ -31,7 +31,7 @@ All content lives in **Git-versioned JSON / TS** under `src/data/`. Adding a pro
 | Animation | **Motion** (`motion/react`) | spring micro-anims, `whileInView`, respect `useReducedMotion` |
 | Theme | **next-themes** | dark default, `attribute="class"` + `.dark` overrides (see DECISIONS) |
 | Icons | **lucide-react** | |
-| Fonts | `next/font/google` | Plan wants **Inter + JetBrains Mono**; layout currently still ships **Geist** (not yet swapped) |
+| Fonts | `next/font/google` | **Inter + JetBrains Mono** active — bound to `--font-sans` / `--font-mono` in `layout.tsx` (Geist removed) |
 | Search | **fuse.js** + hand-rolled TF-IDF | for Project Mentor |
 | Utilities | clsx + tailwind-merge via `cn()` | |
 | Hosting | Vercel (SSG + ISR) | |
@@ -46,7 +46,7 @@ All content lives in **Git-versioned JSON / TS** under `src/data/`. Adding a pro
 
 | Route | Rendering | Source |
 |---|---|---|
-| `/` | SSG | all JSON data files (assembles every section) |
+| `/` | SSG | assembles homepage sections from the content layer; currently **Hero + Engineering Dashboard + Featured Projects** (remaining sections pending — see `ROADMAP.md`) |
 | `/projects/[slug]` | SSG + `generateStaticParams()` | `src/data/projects/[slug].json` — **excludes** `status: "planned"` |
 | `/recruiter` | SSG, `noindex` | aggregated via `lib/recruiter.ts` |
 | `not-found` | SSG | — |
@@ -97,9 +97,19 @@ Most content fields are objects `{ recruiter: string, developer: string }`. `Vie
 - Email is still placeholder (`sanket@example.com`); resume at `/resume.pdf` (not yet added)
 - The 3 planned projects: `devops-api`, `fruit-quality-detection`, `adaptive-cyber-defense`
 
-## Current state (2026-06-29)
+## Current state (updated 2026-07-11)
 
-Foundation only. Toolchain + tokens + types + loaders + providers + all shadcn primitives exist, but `layout.tsx`/`page.tsx` are still Create-Next-App boilerplate, providers aren't mounted, and there are **no sections, features, hooks, or content JSON yet**. See `IMPLEMENTATION_STATUS.md`.
+**Phase 1 (Foundation) complete; Phase 2 (homepage sections) in progress.** What's working now:
+
+- ✅ **Foundation complete** — toolchain, Tailwind v4 tokens, types, project loaders, and all shadcn (Base UI) primitives.
+- ✅ **Application Shell complete** — `layout.tsx` mounts the real fonts (Inter + JetBrains Mono) and both providers, wrapping `Navbar` + `<main>` + `Footer`.
+- ✅ **Hero complete** (refined) and ✅ **Engineering Dashboard complete** — both live on `/`.
+- ✅ **Featured Projects complete** — reusable `ProjectCard` + `StatusBadge`, driven by the content layer.
+- ✅ **Theme switching working** — `ThemeToggle` rendered in `Navbar` (next-themes, class strategy).
+- ✅ **Recruiter/Developer view mode working** — `ViewModeToggle` rendered in `Navbar`, backed by `ViewModeProvider`.
+- ✅ **Content layer complete** — `lib/content.ts` over the loaders + typed JSON in `src/data/`.
+
+Still pending: the remaining homepage sections, project detail pages, feature modules (mentor, architecture viewer, GitHub, coding profiles), the recruiter route, `src/hooks/`, and SEO files. See `ROADMAP.md` for the plan and `IMPLEMENTATION_STATUS.md` for detail.
 
 ## Hard rules for working here
 

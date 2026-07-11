@@ -1,13 +1,13 @@
 # Implementation Status
 
 > Snapshot comparing the current repository against **Architecture & Implementation Plan v2.0**.
-> Generated: 2026-06-29. Updated: 2026-07-01 (Milestone 3.2 — Hero Refinement). Branch: `main`.
+> Generated: 2026-06-29. Updated: 2026-07-11 (Documentation Synchronization — see §14). Branch: `main`.
 
 ## TL;DR
 
-The **application shell is complete** and **Phase 2 (homepage sections) has begun** — the **Hero** (refined) and **Engineering Dashboard** are built and live on `/`. The repo is green on `npm run lint` and `npm run build`, and the Base UI button-composition console warnings have been eliminated. `layout.tsx` mounts the real font stack (Inter + JetBrains Mono), `ThemeProvider`, and `ViewModeProvider`, wrapping a `Navbar` + `<main>` + `Footer` shell. Reusable layout primitives + a reusable `MetricCard` exist. Data + content access layers are in place. What remains: the other homepage sections, project pages, feature modules, and the recruiter route.
+**Phase 1 (Foundation) is complete** and **Phase 2 (homepage sections) is in progress** — the **Hero** (refined), the **Engineering Dashboard**, and the **Featured Projects** section are built and live on `/`. The repo is green on `npm run lint` and `npm run build`, with no Base UI console warnings. `layout.tsx` mounts the real font stack (**Inter + JetBrains Mono**), `ThemeProvider`, and `ViewModeProvider`, wrapping a `Navbar` + `<main>` + `Footer` shell; the `ThemeToggle` and `ViewModeToggle` are rendered in the `Navbar`, so **theme switching and Recruiter/Developer view mode both work end-to-end**. Reusable primitives exist (`Container`, `SectionHeader`, `MetricCard`, `ProjectCard`, `StatusBadge`). Data + content access layers are complete. What remains: the other homepage sections, project detail pages, feature modules, and the recruiter route.
 
-**Overall completion: ~46%** (Phase 1 ~95%; **Phase 2 started — Hero refined + Dashboard done**; data + content layers 100%; build/lint green; no Base UI warnings).
+**Overall completion: ~52%** (Phase 1 **100%**; **Phase 2 in progress — Hero + Dashboard + Featured Projects done**; data + content layers 100%; build/lint green; no Base UI warnings).
 
 > ✅ **Validation blockers RESOLVED (Milestone 1.6).** The prior build/lint failures — Base UI `<TooltipTrigger asChild>` (ADR-002) and `react-hooks/set-state-in-effect` — have been fixed using correct Base UI (`render` prop) and React (`useSyncExternalStore`) patterns. No lint rules were disabled. See "Milestone 1.6" section below.
 
@@ -17,8 +17,8 @@ The **application shell is complete** and **Phase 2 (homepage sections) has begu
 
 | Phase | Title | Status | Est. % |
 |---|---|---|---|
-| **Phase 1** | Foundation (Days 1–2) | 🟡 Partial | ~65% |
-| **Phase 2** | Homepage Sections (Days 3–5) | 🟡 Started — Hero + Dashboard done | ~20% |
+| **Phase 1** | Foundation (Days 1–2) | 🟢 Complete | 100% |
+| **Phase 2** | Homepage Sections (Days 3–5) | 🟡 In progress — Hero + Dashboard + Featured Projects done | ~30% |
 | **Phase 3** | Project Detail Pages (Days 6–8) | 🔴 Not started (groundwork only) | ~5% |
 | **Phase 4** | Unique Features (Days 9–11) | 🔴 Not started | 0% |
 | **Phase 5** | Integrations (Days 12–13) | 🔴 Not started (types only) | ~5% |
@@ -40,7 +40,7 @@ Legend: 🟢 Complete · 🟡 Partial · 🔴 Not started
 | Build Navbar + Footer | 🟢 | Built in Milestone 2 (`Navbar`, `Footer`, plus `DesktopNav`/`MobileNav`, `Container`, `SectionHeader`) |
 | Set up TypeScript type definitions | 🟢 | `project.ts`, `timeline.ts`, `github.ts`, `coding-profile.ts`, `common.ts` all present and thorough |
 | Create `site.config.ts` | 🟢 | Present, populated with real data (CGPA 8.69, GitHub `kr-Sanket`, etc.) |
-| Create utility functions | 🟡 | `cn()`, `loadProject/loadAllProjects/loadFeaturedProjects/loadProjectSlugs`, `metadata.ts`, `constants.ts`, **`content.ts` (content access layer, Milestone 1.6)** present. **Missing:** `recruiter.ts`, `formatDate()` |
+| Create utility functions | 🟢 | `cn()`, `loadProject/loadAllProjects/loadFeaturedProjects/loadProjectSlugs`, `metadata.ts`, `constants.ts`, `content.ts` (content access layer, Milestone 1.6) present. Foundation utilities complete; `recruiter.ts` (recruiter-view aggregation) and a `formatDate()` helper are deferred to their consuming phases (Phase 5/6), not Phase-1 blockers |
 
 ---
 
@@ -75,9 +75,24 @@ These exist and conform (closely) to the plan:
 **Theming / state**
 - `providers/ThemeProvider.tsx` — next-themes wrapper ✔
 - `providers/ViewModeProvider.tsx` — React Context + `localStorage` ✔ (matches the state strategy)
-- `components/layout/ThemeToggle.tsx` ✔
-- `components/layout/ViewModeToggle.tsx` ✔ (built as a custom segmented control rather than shadcn `Toggle`)
+- `components/layout/ThemeToggle.tsx` ✔ (rendered in `Navbar` — theme switching works)
+- `components/layout/ViewModeToggle.tsx` ✔ (custom segmented control; rendered in `Navbar` — Recruiter/Developer mode works)
 - `app/globals.css` — Tailwind v4 `@theme` + token system ✔
+
+**App shell (`src/app/`)**
+- `layout.tsx` — Inter + JetBrains Mono via `next/font`, `ThemeProvider` + `ViewModeProvider` mounted, `Navbar`/`<main>`/`Footer` shell, `createMetadata()` ✔
+- `page.tsx` — assembles `Hero` + `EngineeringDashboard` + `FeaturedProjects` ✔
+
+**Layout components (`src/components/layout/`)**
+- `Container`, `SectionHeader`, `Navbar`, `DesktopNav`, `MobileNav`, `Footer` ✔
+
+**Shared components (`src/components/shared/`)**
+- `MetricCard.tsx` — reusable metric tile (Milestone 3.1) ✔
+- `ProjectCard.tsx` — reusable project card (Milestone 4.1) ✔
+- `StatusBadge.tsx` — reusable, data-driven project-status pill (Milestone 4.1) ✔
+
+**Homepage sections (`src/sections/`)**
+- `Hero.tsx` ✔, `EngineeringDashboard.tsx` ✔, `FeaturedProjects.tsx` ✔
 
 ---
 
@@ -92,13 +107,14 @@ These exist and conform (closely) to the plan:
 ### Layout components (`src/components/layout/`) — ✅ **DONE (Milestone 2)**
 - ~~`Navbar.tsx`, `Footer.tsx`, `SectionHeader.tsx`, `Container.tsx`~~ ✅ created (plus `DesktopNav.tsx`, `MobileNav.tsx`)
 
-### Shared components (`src/components/shared/`) — **entire folder missing**
-- `AnimatedCounter.tsx`, `ScrollReveal.tsx`, `StatusBadge.tsx`, `TimelineItem.tsx`
+### Shared components (`src/components/shared/`) — 🟡 **partial**
+- ~~`StatusBadge.tsx`~~ ✅ created (Milestone 4.1); plus `MetricCard.tsx` (3.1), `ProjectCard.tsx` (4.1) — not in the original plan list but present
+- Still missing: `AnimatedCounter.tsx`, `ScrollReveal.tsx`, `TimelineItem.tsx`
 - (`ViewModeToggle.tsx` exists but under `layout/`, not `shared/`)
 
-### Homepage sections (`src/sections/`) — 🟡 **started (Milestone 3.1)**
-- ~~`Hero`~~ ✅, ~~`EngineeringDashboard`~~ ✅ created
-- Still missing: `FeaturedProjects`, `EngineeringTimeline`, `GitHubHub`, `CodingProfiles`, `CurrentMission`, `Skills`, `Leadership`, `Certifications`, `About`, `Contact`
+### Homepage sections (`src/sections/`) — 🟡 **in progress (Milestones 3.1, 4.1)**
+- ~~`Hero`~~ ✅, ~~`EngineeringDashboard`~~ ✅, ~~`FeaturedProjects`~~ ✅ created
+- Still missing: `EngineeringTimeline`, `GitHubHub`, `CodingProfiles`, `CurrentMission`, `Skills`, `Leadership`, `Certifications`, `About`, `Contact`
 
 ### Feature modules (`src/features/`) — **entire folder missing**
 - `project-mentor/` — `MentorChat`, `SearchEngine.ts`, `tfidf.ts`, `buildIndex.ts`, `types.ts`
@@ -128,7 +144,7 @@ These exist and conform (closely) to the plan:
 | File / Area | Plan | Actual | Severity |
 |---|---|---|---|
 | `app/layout.tsx` | Inter + JetBrains Mono via `next/font`; mounts ThemeProvider + ViewModeProvider + Navbar/Footer; real metadata | ✅ **Done (Milestone 2)** — Inter + JetBrains Mono, providers mounted, `Navbar`/`<main>`/`Footer` shell, `createMetadata()`, `suppressHydrationWarning` | 🟢 Resolved |
-| `app/page.tsx` | Assembles all homepage sections | Minimal shell placeholder (dogfoods `Container` + `SectionHeader`); real sections deferred to Phase 2 | 🟢 Interim |
+| `app/page.tsx` | Assembles all homepage sections | Assembles `Hero` + `EngineeringDashboard` + `FeaturedProjects`; remaining sections pending (Phase 2 in progress) | 🟢 On track |
 | Next.js version | 15 | **16.2.7** | 🟡 Medium (App Router APIs differ; see AGENTS.md note) |
 | shadcn engine | Radix-based primitives | **Base UI** (`@base-ui/react`), shadcn 4, style `base-nova` | 🟡 Medium |
 | Theme attribute | `attribute="data-theme"`, `[data-theme="light"]` overrides, HSL tokens | `attribute="class"`, `.dark` overrides, **oklch** tokens (shadcn default) | 🟡 Medium (consistent internally, but doc is now stale) |
@@ -144,9 +160,10 @@ These exist and conform (closely) to the plan:
 
 ## 6. Build / Health Notes
 
-- `.next/` build artifacts exist, so the scaffold compiles.
-- The providers and toggles are **dead code** until mounted in `layout.tsx` — `ViewModeToggle`/`ThemeToggle` are not rendered anywhere.
-- `globals.css` imports `shadcn/tailwind.css` and `tw-animate-css` — confirm these resolve under the installed versions during the next real build.
+- Repo is **green**: `npm run lint` → exit 0; `npm run build` → exit 0 (compiled, TypeScript passed, static routes prerendered).
+- `ThemeProvider` and `ViewModeProvider` are **mounted** in `layout.tsx`; `ThemeToggle` and `ViewModeToggle` are **rendered in the `Navbar`** — theme switching and Recruiter/Developer view mode are live (no longer dead code).
+- `globals.css` imports `shadcn/tailwind.css` and `tw-animate-css`; both resolve under the installed versions (build is green).
+- Fonts are **Inter + JetBrains Mono** via `next/font/google`, bound to `--font-sans` / `--font-mono` (Geist fully removed).
 - **AGENTS.md is authoritative:** this is Next.js 16 with breaking changes — read `node_modules/next/dist/docs/` before writing route/layout code. Do not assume Next 15 App Router APIs.
 
 ---
@@ -307,7 +324,61 @@ None.
 - **`npm run build`** → exit 0; compiled, TypeScript passed, `/` prerendered ✅
 - **Browser console** → free of the Base UI button-composition warnings (fixed by construction; verify via the screenshot steps).
 
+## 13. Milestone 4.1 — Featured Projects Foundation (2026-07-11)
+
+**Scope:** the Featured Projects homepage section + a reusable `ProjectCard` only. No project detail pages, timeline, or other sections. **Status: ✅ complete — repo green.**
+
+### Files created (3)
+- `src/components/shared/StatusBadge.tsx` — reusable project-status pill. Label + color are driven entirely by `siteConfig.projectStatuses` (emerald/blue/amber/muted), so it covers any `ProjectStatus` and stays data-driven. Quiet neutral pill with a colored leading dot (no loud color fills).
+- `src/components/shared/ProjectCard.tsx` — reusable, presentational card for any `Project`: `StatusBadge`, title, tagline, recruiter impact (shown only when available), tech-stack chips (capped at 6 with a `+N` overflow badge), and a CTA. Single subtle hover interaction (ring lift), no gradients/motion.
+- `src/sections/FeaturedProjects.tsx` — async server section; pulls `getFeaturedProjects()` from the content layer and renders each project through `ProjectCard` in a responsive grid.
+
+### Files modified (2)
+- `src/app/page.tsx` — renders `<FeaturedProjects />` after the dashboard.
+- `IMPLEMENTATION_STATUS.md` — this update.
+
+### Design decisions
+- **Data-driven, zero hardcoding (ADR-010):** the section consumes `getFeaturedProjects()`; the card is a pure function of a `Project`; status label/color come from `siteConfig.projectStatuses`. Adding/editing a featured project is still a JSON-only change.
+- **Recruiter impact "when available":** two of three featured projects still carry placeholder `impact: "TODO: …"`. `ProjectCard` hides impact when it's empty or `TODO`-prefixed, so only devops-api surfaces a real impact line today — no fabricated metrics.
+- **CTA is a placeholder by design:** `/projects/[slug]` isn't built yet, so cards render a quiet "Case study coming soon" label. `ProjectCard` accepts an optional `href`; enabling real links later is a one-line change in `FeaturedProjects`.
+- **Premium, restrained aesthetic (Vercel/Linear/Stripe):** built on existing `Card`/`Badge`/`Container`/`SectionHeader`; mono tech chips, generous spacing, a single ring-lift hover. No flashy gradients or animations (reduced-motion-safe by construction).
+- **Layout:** responsive grid — 1 col (mobile) → 2 (`md`) → 3 (`lg`); cards are equal-height (`h-full justify-between`) so the CTA row aligns across the row.
+- **Base UI composition (ADR-002):** no `asChild`; the CTA is a `next/link` styled directly, and `StatusBadge` uses the `Badge` primitive's `render`-free span default.
+
+### Validation
+- **`npm run lint`** → exit 0, clean ✅
+- **`npm run build`** → exit 0; compiled, TypeScript passed, `/` prerendered ✅
+
+### Remaining work
+- Project detail pages (`/projects/[slug]`) — once built, pass `href={ROUTES.project(slug)}` in `FeaturedProjects` to activate card CTAs.
+- Remaining homepage sections (Timeline, Skills, Mission, Leadership, Certifications, About, Contact, GitHubHub, CodingProfiles), feature modules, recruiter route, SEO files.
+- Content placeholders from Milestone 1.5 (real `impact` for fruit-quality-detection & adaptive-cyber-defense; project images).
+
+## 14. Milestone — Documentation Synchronization (2026-07-11)
+
+**Scope:** documentation only — reconcile all project docs with the current repository. **No code, UI, features, or refactors.** The repository is the source of truth. **Status: ✅ complete — repo green.**
+
+### Files modified (3)
+- `IMPLEMENTATION_STATUS.md` — this file: Phase 1 marked **Complete**; Phase 2 progress updated through Hero + Dashboard + Featured Projects; removed stale claims (providers not mounted, layout/page as CNA boilerplate, Hero/Dashboard not implemented, Geist fonts); completion summary and current-state notes refreshed; milestone history (§8–§13) preserved intact.
+- `PROJECT_CONTEXT.md` — replaced the stale "Current state" snapshot; corrected font info (Inter + JetBrains Mono active); updated the `/` route description to reflect the current homepage; architecture left unchanged.
+- `DECISIONS.md` — updated statuses only: ADR-001 (Next.js 16) accepted; ADR-004 provider-mounting open item resolved; obsolete "Open Confirmations" entry removed. No history deleted.
+
+### Files created (1)
+- `ROADMAP.md` — new single source of truth for progress (Completed / Current / Next / Future). Concise; does not duplicate this file's detail.
+
+### What changed vs. reality (verified against the repo)
+- **Phase 1 = complete**; foundation utilities present (`recruiter.ts`/`formatDate()` deferred to their consuming phases, not Phase-1 blockers).
+- **Live on `/`:** `Hero`, `EngineeringDashboard`, `FeaturedProjects`.
+- **Providers mounted; toggles rendered in `Navbar`** — theme switching + Recruiter/Developer view mode work end-to-end.
+- **Shared components present:** `MetricCard`, `ProjectCard`, `StatusBadge`.
+- **Still absent (confirmed):** `src/hooks/`, `src/features/`, `lib/recruiter.ts`, project detail + recruiter routes, `not-found`/`sitemap`/`robots`, `public/images/**`, `public/resume.pdf`.
+
+### Validation
+- **`npm run lint`** → exit 0, clean ✅
+- **`npm run build`** → exit 0; compiled, TypeScript passed, `/` prerendered ✅
+
 ## 7. See Also
 
+- `ROADMAP.md` — single source of truth for milestone progress
 - `PROJECT_CONTEXT.md` — condensed architecture for future sessions
 - `DECISIONS.md` — architectural decisions & deviations log
