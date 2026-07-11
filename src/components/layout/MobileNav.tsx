@@ -51,6 +51,7 @@ export function MobileNav({
           {links.map((link) => (
             <SheetClose
               key={link.href}
+              nativeButton={false}
               render={<Link href={link.href} />}
               className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >

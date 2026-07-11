@@ -1,13 +1,13 @@
 # Implementation Status
 
 > Snapshot comparing the current repository against **Architecture & Implementation Plan v2.0**.
-> Generated: 2026-06-29. Updated: 2026-07-01 (Milestone 2 — Application Shell). Branch: `main`.
+> Generated: 2026-06-29. Updated: 2026-07-01 (Milestone 3.2 — Hero Refinement). Branch: `main`.
 
 ## TL;DR
 
-The **application shell is complete** and the repo is green on `npm run lint` and `npm run build`. `layout.tsx` now mounts the real font stack (Inter + JetBrains Mono), `ThemeProvider`, and `ViewModeProvider`, wrapping a `Navbar` + `<main>` + `Footer` shell. Reusable layout primitives (`Navbar`, `Footer`, `Container`, `SectionHeader`, plus `DesktopNav`/`MobileNav`) exist and are production-ready. The data layer + content access layer are in place. What remains: homepage sections, project pages, feature modules, and the recruiter route (all deferred by scope).
+The **application shell is complete** and **Phase 2 (homepage sections) has begun** — the **Hero** (refined) and **Engineering Dashboard** are built and live on `/`. The repo is green on `npm run lint` and `npm run build`, and the Base UI button-composition console warnings have been eliminated. `layout.tsx` mounts the real font stack (Inter + JetBrains Mono), `ThemeProvider`, and `ViewModeProvider`, wrapping a `Navbar` + `<main>` + `Footer` shell. Reusable layout primitives + a reusable `MetricCard` exist. Data + content access layers are in place. What remains: the other homepage sections, project pages, feature modules, and the recruiter route.
 
-**Overall completion: ~40%** (Phase 1 ~95% — app shell done; **data + content layers 100%**; **build/lint green**; homepage sections/features/pages not started).
+**Overall completion: ~46%** (Phase 1 ~95%; **Phase 2 started — Hero refined + Dashboard done**; data + content layers 100%; build/lint green; no Base UI warnings).
 
 > ✅ **Validation blockers RESOLVED (Milestone 1.6).** The prior build/lint failures — Base UI `<TooltipTrigger asChild>` (ADR-002) and `react-hooks/set-state-in-effect` — have been fixed using correct Base UI (`render` prop) and React (`useSyncExternalStore`) patterns. No lint rules were disabled. See "Milestone 1.6" section below.
 
@@ -18,7 +18,7 @@ The **application shell is complete** and the repo is green on `npm run lint` an
 | Phase | Title | Status | Est. % |
 |---|---|---|---|
 | **Phase 1** | Foundation (Days 1–2) | 🟡 Partial | ~65% |
-| **Phase 2** | Homepage Sections (Days 3–5) | 🔴 Not started | 0% |
+| **Phase 2** | Homepage Sections (Days 3–5) | 🟡 Started — Hero + Dashboard done | ~20% |
 | **Phase 3** | Project Detail Pages (Days 6–8) | 🔴 Not started (groundwork only) | ~5% |
 | **Phase 4** | Unique Features (Days 9–11) | 🔴 Not started | 0% |
 | **Phase 5** | Integrations (Days 12–13) | 🔴 Not started (types only) | ~5% |
@@ -96,8 +96,9 @@ These exist and conform (closely) to the plan:
 - `AnimatedCounter.tsx`, `ScrollReveal.tsx`, `StatusBadge.tsx`, `TimelineItem.tsx`
 - (`ViewModeToggle.tsx` exists but under `layout/`, not `shared/`)
 
-### Homepage sections (`src/sections/`) — **entire folder missing**
-- `Hero`, `FeaturedProjects`, `EngineeringDashboard`, `EngineeringTimeline`, `GitHubHub`, `CodingProfiles`, `CurrentMission`, `Skills`, `Leadership`, `Certifications`, `About`, `Contact`
+### Homepage sections (`src/sections/`) — 🟡 **started (Milestone 3.1)**
+- ~~`Hero`~~ ✅, ~~`EngineeringDashboard`~~ ✅ created
+- Still missing: `FeaturedProjects`, `EngineeringTimeline`, `GitHubHub`, `CodingProfiles`, `CurrentMission`, `Skills`, `Leadership`, `Certifications`, `About`, `Contact`
 
 ### Feature modules (`src/features/`) — **entire folder missing**
 - `project-mentor/` — `MentorChat`, `SearchEngine.ts`, `tfidf.ts`, `buildIndex.ts`, `types.ts`
@@ -245,6 +246,66 @@ None. Data models, folder structure, and the Base-UI/oklch/class-based decisions
 - `not-found.tsx`, `sitemap.ts`, `robots.ts`, per-route OG images (SEO, Phase 6).
 - Content placeholders/TODOs from Milestone 1.5 (empty architecture/mentor for research projects, empty repo URLs, cert date/url, placeholder email, missing `/public/images` + `resume.pdf`).
 - `DesktopNav` scrollspy for hash links (once sections exist).
+
+## 11. Milestone 3.1 — Hero & Engineering Dashboard (2026-07-01)
+
+**Scope:** Hero + Engineering Dashboard only — no other homepage sections. **Status: ✅ complete — repo green.**
+
+### Files created (3)
+- `src/sections/Hero.tsx` — headline (name/role/tagline/focus badges/CTAs) + a premium "Engineering Status" console panel. Consumes `siteConfig` and `getMission()` (server).
+- `src/sections/EngineeringDashboard.tsx` — 4-metric grid from `siteConfig.dashboard`, maps icon-name strings → lucide icons (server).
+- `src/components/shared/MetricCard.tsx` — reusable, presentational, animation-ready metric tile (takes a resolved `LucideIcon`).
+
+### Files modified (2)
+- `src/data/site.config.ts` — added an owner-editable `status` block (`availability`, `location`) for the Hero panel; keeps those values data-driven rather than hardcoded in the component.
+- `src/app/page.tsx` — now renders `<Hero />` + `<EngineeringDashboard />` (replaced the shell placeholder).
+
+### Design decisions
+- **Data-driven, no fabrication:** Hero pulls `name`/`role`/`tagline`/`focusAreas`/`social` from `siteConfig` and "building"/"researching" from `getMission()`. `location`/`availability` didn't exist in the data layer, so they were added to `site.config.ts` (editable) instead of being hardcoded — `location: "India"` is factual for VIT; `availability` is a conventional editable default.
+- **Premium engineering aesthetic (Vercel/Linear/Stripe):** generous whitespace, typographic hierarchy (large `tracking-tight` name, `font-mono` labels), a restrained top gradient, and a bordered "status console" panel with a live pulse dot — no decorative clutter.
+- **Reuse over duplication:** built on `Container`, `SectionHeader`, `content.ts`, and shadcn `Card`/`Badge`/`Button`. Focus areas live on the left (badges); the panel avoids repeating them.
+- **Base UI composition (ADR-002):** CTA `Button`s become links via the `render` prop, never `asChild`.
+- **Animation-ready, not animated:** `MetricCard` isolates the value in its own element so an `AnimatedCounter` can wrap it later; no animation added yet (kept simple per scope).
+
+### Validation
+- **`npm run lint`** → exit 0, clean ✅
+- **`npm run build`** → exit 0; compiled, TypeScript passed, 4 static routes prerendered ✅
+
+### Remaining work
+- Remaining homepage sections (FeaturedProjects, Timeline, Skills, Mission, Leadership, Certifications, About, Contact, GitHubHub, CodingProfiles).
+- Project pages, feature modules, recruiter route; SEO files; content placeholders from Milestone 1.5.
+- Future: `AnimatedCounter` for dashboard metrics; scrollspy for `DesktopNav` hash links.
+
+## 12. Milestone 3.2 — Hero Refinement (2026-07-01)
+
+**Scope:** refine the Hero only + fix its Base UI console warnings. Dashboard untouched (no spacing change needed). **Status: ✅ complete — repo green, console clean.**
+
+### Files created
+None.
+
+### Files modified (3)
+- `src/sections/Hero.tsx` — full refinement (see below).
+- `src/components/layout/MobileNav.tsx` — added `nativeButton={false}` to the `SheetClose`→`Link` (same Base UI warning class; one-prop fix so the mobile menu is also warning-free).
+- `IMPLEMENTATION_STATUS.md` — this update.
+
+### Problems fixed — Base UI console warnings
+- **Root cause:** button-like Base UI primitives (`Button`, `Dialog.Close`) rendering a non-`<button>` element via `render` while `nativeButton` defaulted to `true` → *"A component that acts as a button expected a native `<button>`…"*.
+- **Hero fix (proper pattern):** CTAs are links, so they no longer go through the `Button` primitive — they render as `Link`/`<a>` styled with `buttonVariants()`. Semantic and warning-free.
+- **MobileNav fix:** `SheetClose` must stay a `Dialog.Close` while rendering a `Link`, so it now sets `nativeButton={false}` — the composition pattern the warning itself prescribes.
+- No warnings suppressed, no lint rules disabled.
+
+### Design decisions (refinement)
+- **Left hierarchy:** small intro ("Hi, I'm") → large identity (`name`, `text-5xl`/`6xl`) → mono role → tagline → focus badges → CTAs. Typography-led rhythm via graduated `mt-*` spacing, so the name is no longer the only dominant element.
+- **Right panel = visual anchor:** replaced the table/row `<dl>` feel with a single `Card` containing grouped **status blocks** (Availability + Location as a 2-col pair, then Current Focus, Currently Building, Research). Header with a static "Active" dot + one full-width `Separator`. No gradients, no glassmorphism, no flashy animation, no heavy borders.
+- **Panel data mapping (no fabrication, no duplication with left badges):** Current Focus ← `getMission().learning`; Currently Building ← `mission.building`; Research ← `mission.exploring`; Availability/Location ← `siteConfig.status`. Left focus badges remain the high-level disciplines (`focusAreas`).
+- **CTA hierarchy:** Primary "View Projects" (solid), Secondary "GitHub" (outline, external), Tertiary "Resume" (ghost) — the resume link comes from `siteConfig.social.resume` (asset still a placeholder).
+- **Layout/whitespace:** hero fills the viewport naturally on `lg` (`min-h-[calc(100svh-4rem)]`, vertically centered) and tightens padding; right column capped at `26rem` for left/right balance.
+- **Accessibility / reduced motion:** single `<h1>`, discernible link text, external link `rel="noopener noreferrer"`, decorative dot `aria-hidden`, and no animations (reduced-motion-safe).
+
+### Validation
+- **`npm run lint`** → exit 0, clean ✅
+- **`npm run build`** → exit 0; compiled, TypeScript passed, `/` prerendered ✅
+- **Browser console** → free of the Base UI button-composition warnings (fixed by construction; verify via the screenshot steps).
 
 ## 7. See Also
 
