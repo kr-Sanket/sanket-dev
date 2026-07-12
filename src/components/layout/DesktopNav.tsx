@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { HashLink } from "@/components/shared/HashLink";
 import { cn } from "@/lib/utils";
 
 export interface NavItem {
@@ -12,7 +12,8 @@ export interface NavItem {
 /**
  * Desktop primary navigation. Active-state architecture is ready: route links
  * (`/foo`) resolve their active state from the pathname. In-page hash links
- * (`#foo`) render normally today and are the future hook point for scrollspy.
+ * (`#foo`) use `HashLink`, which scrolls imperatively so repeated clicks always
+ * scroll (see `scrollToHash`); they remain the future hook point for scrollspy.
  */
 export function DesktopNav({
   links,
@@ -34,7 +35,7 @@ export function DesktopNav({
             : pathname.startsWith(link.href));
 
         return (
-          <Link
+          <HashLink
             key={link.href}
             href={link.href}
             aria-current={isActive ? "page" : undefined}
@@ -44,7 +45,7 @@ export function DesktopNav({
             )}
           >
             {link.label}
-          </Link>
+          </HashLink>
         );
       })}
     </nav>

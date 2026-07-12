@@ -8,6 +8,7 @@ import { Leadership } from "@/sections/Leadership";
 import { Certifications } from "@/sections/Certifications";
 import { Contact } from "@/sections/Contact";
 import { GitHubHub } from "@/features/github/GitHubHub";
+import { CodingProfiles } from "@/features/coding-profiles/CodingProfiles";
 
 export default function Home() {
   return (
@@ -15,13 +16,16 @@ export default function Home() {
       <Hero />
       <EngineeringDashboard />
       <FeaturedProjects />
+      <GitHubHub />
       <Skills />
       <EngineeringTimeline />
       <About />
       <Leadership />
       <Certifications />
       <Contact />
-      <GitHubHub />
+      {/* Coding Profiles is parked after the defined flow; the next milestone
+          moves it into place directly after GitHub Hub. */}
+      <CodingProfiles />
     </>
   );
 }

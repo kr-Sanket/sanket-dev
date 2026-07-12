@@ -126,5 +126,9 @@
   }
   html {
     @apply font-sans;
+    /* Offset in-page anchor scrolling by the sticky navbar height (h-16 = 4rem)
+       so section headings land below the header instead of behind it. Applies
+       to scrollIntoView / hash navigation. */
+    @apply scroll-pt-16;
   }
 }

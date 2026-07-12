@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Download } from "lucide-react";
 import { Container } from "@/components/layout/Container";
+import { HashLink } from "@/components/shared/HashLink";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -42,13 +42,13 @@ export function Hero() {
           </div>
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Link
+            <HashLink
               href={`#${SECTION_IDS.projects}`}
               className={cn(buttonVariants({ size: "lg" }), CTA_SIZE)}
             >
               View Projects
               <ArrowRight />
-            </Link>
+            </HashLink>
             <a
               href={social.github}
               target="_blank"

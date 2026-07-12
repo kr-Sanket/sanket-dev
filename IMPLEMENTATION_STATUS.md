@@ -610,6 +610,82 @@ None.
 - Live values are baked at build and refresh on the 1h ISR cycle.
 - Coding Profiles is the next milestone (see `ROADMAP.md`).
 
+## 23. Milestone 5.2 — Coding Profiles (2026-07-11)
+
+**Scope:** the Coding Profiles feature only (Phase 5 live integration). No Recruiter View / Project Mentor / Architecture Viewer work; no changes to completed sections. **Status: ✅ complete — repo green.**
+
+### Files created (4, under `src/features/coding-profiles/`)
+- `codingProfiles.service.ts` — resilient, server-only data service. `getCodingProfiles(): Promise<CodingProfilesData>` builds a `CodingProfile` for each configured (non-empty) username, deriving `profileUrl` and fetching stats concurrently. **LeetCode** stats come from its unofficial public GraphQL endpoint (problems solved, ranking, contest rating); **CodeChef/HackerRank** have no reliable public API, so they are link-only (empty stats, no fabricated numbers). Never throws — any failure yields `stats: {}`. Also exports `totalProblemsSolved`.
+- `StatsDisplay.tsx` — renders only the stat fields that exist as value/label pairs (plain elements, not nested cards); renders nothing when there are no stats.
+- `ProfileCard.tsx` — per-platform card (neutral platform icon + label `<h3>` + `@username` + `StatsDisplay` + external "View profile" button).
+- `CodingProfiles.tsx` — async server section; **reuses the shared `MetricCard`** for aggregate tiles (Platforms, Problems Solved), renders a `ProfileCard` grid, and shows a graceful placeholder when no usernames are configured.
+
+### Files modified (2)
+- `src/data/site.config.ts` — added an owner-editable `codingProfiles` block (`leetcode`/`codechef`/`hackerrank`, empty by default) — the single source of truth for usernames (mirrors the existing `status` owner-editable block). No type change; additive.
+- `src/app/page.tsx` — mounts `<CodingProfiles />` after `<GitHubHub />`. No other homepage changes.
+
+### Repository-health / reuse decisions
+- **Reused:** `MetricCard` (aggregate tiles — same reuse as GitHub Hub), `Container`, `SectionHeader`, `Card`, `buttonVariants`, `cn`, `siteConfig`, `SECTION_IDS`. The fetch/ISR/never-throw idioms mirror `github.service.ts` (same patterns, platform-specific endpoints) — no duplicated fetch utility was extracted since the two services target different APIs and share no request shape.
+- **New abstractions (justified):** `codingProfiles.service.ts` (distinct data source — cannot extend the GitHub service without coupling unrelated APIs) and the 3 presentational components (distinct responsibilities). `MetricCard` is reused at the section level rather than nested inside `ProfileCard` (which would create double-card borders); `StatsDisplay` uses plain elements for the per-card stats — documented in `StatsDisplay.tsx`.
+- **Types unchanged:** `src/types/coding-profile.ts` was not modified.
+
+### Architectural decisions
+- **ISR per ADR-011:** each fetch sets `next: { revalidate: 21600 }` (6h). The homepage's reported page-level `revalidate` remains **1h** because Next uses the minimum across all page fetches (GitHub Hub's 3600s); the coding service still declares 6h correctly per the milestone.
+- **Username source:** only `siteConfig.codingProfiles`; empty values omit a platform entirely (no link, no card).
+- **Graceful fallback, no fabrication:** unconfigured → section placeholder; configured but stats unavailable → link-only card; failed fetch → empty stats. No solved counts or ratings are ever invented.
+- **Server components only** — no client islands.
+
+### Validation
+- **`npm run lint`** → exit 0, clean ✅
+- **`npm run build`** → exit 0; `/` prerendered as ISR (Revalidate 1h); 7 routes total ✅
+- **Placeholder path (current state — no usernames configured):** section header renders + "Coding profiles coming soon" placeholder; no platform URLs, usernames, or stat labels leaked (nothing fabricated); section ordered after GitHub Hub. ✅
+- **Populated path (verified via a temporary config edit, then reverted):** a `ProfileCard` rendered with the platform label, the config-derived profile URL (`hackerrank.com/profile/<user>`), the `MetricCard` "Platforms" aggregate tile, and the external "View profile" button — with no fabricated stats for the link-only platform. Config restored to empty afterward. ✅
+
+### Notes / remaining limitations
+- **Usernames are empty owner placeholders** (like the existing email/resume placeholders); the section shows a placeholder until the owner fills in `siteConfig.codingProfiles`. Then LeetCode auto-populates stats and all platforms show link cards.
+- **LeetCode uses an unofficial endpoint** (no official public API); if it changes/blocks requests, the card degrades to link-only (no crash). **CodeChef/HackerRank** are link-only by design (no reliable public stats API — no fabrication).
+- Live values are baked at build and refresh on the 6h ISR cycle.
+- Recruiter View is the next milestone (see `ROADMAP.md`).
+
+## 24. Milestone 5.1.5 — Navigation & Homepage Flow Refinement (2026-07-12)
+
+**Scope:** UX polish only — fix the in-page navigation bug, reorder the homepage sections, and confirm navbar↔section consistency. **No new features, no redesign, no architecture changes, no new sections.** **Status: ✅ complete — repo green.**
+
+### Root cause (navigation bug)
+Navbar items and the Hero "View Projects" CTA were `<Link href="#section">` anchors. Native browsers — and Next's `<Link>` — only scroll to a fragment when the URL fragment **changes** (confirmed in `node_modules/next/dist/docs/.../components/link.md`). First click set `location.hash` and scrolled; after the user manually scrolled away, the hash still matched the target, so re-clicking the same item resolved to the same URL → **no navigation fired → no scroll**. That is why "clicking the same navbar item again often did nothing."
+
+### Fix (proper browser/Next solution — no reloads, no timeouts)
+- **`src/lib/scroll.ts` (new):** `scrollToHash(href)` finds the target by id and calls `element.scrollIntoView` **imperatively on every click**, so it scrolls regardless of the current hash/scroll position. Smooth by default; respects `prefers-reduced-motion` (`behavior: "auto"` when reduced). Updates the URL via `history.replaceState` — shareable, no reload, no Next navigation, no native re-scroll.
+- **`src/components/shared/HashLink.tsx` (new):** a `next/link` wrapper that intercepts hash hrefs (`preventDefault` + `scrollToHash`) and lets route hrefs fall through to normal navigation.
+- **Sticky-header offset:** `html { scroll-pt-16 }` (4rem = navbar `h-16`) in `globals.css` so anchored sections land below the sticky header — the offset the Next docs recommend for `scrollIntoView`/hash nav.
+
+### Files created (2)
+- `src/lib/scroll.ts`, `src/components/shared/HashLink.tsx`.
+
+### Files modified (5)
+- `src/components/layout/DesktopNav.tsx` — `Link` → `HashLink` (active-state logic unchanged).
+- `src/components/layout/MobileNav.tsx` — now a **controlled** Sheet: hash taps close the drawer, then scroll from Base UI's `onOpenChangeComplete` (fires after the close animation, once the scroll lock is released) — event-driven, not a timeout. Plain `Link`s replace the `SheetClose`→`Link` pattern, so the prior `nativeButton={false}` workaround is no longer needed.
+- `src/sections/Hero.tsx` — "View Projects" CTA `Link` → `HashLink` (unused `Link` import removed).
+- `src/app/page.tsx` — **section reorder** (see below).
+- `src/app/globals.css` — added `scroll-pt-16` to `html`.
+
+### Homepage order change (Issue #2)
+Before: Hero → Dashboard → Projects → Skills → Timeline → About → Leadership → Certifications → Contact → **GitHub** → CodingProfiles (GitHub Hub was stranded near the bottom).
+After: **Hero → Dashboard → Projects → GitHub → Skills → Timeline → About → Leadership → Certifications → Contact**. Coding Profiles is parked after the defined flow (a code comment marks it); the next milestone moves it directly after GitHub Hub, per the brief. Only the render order in `page.tsx` changed — no section was redesigned, respaced, or re-typographed.
+
+### Navbar consistency (Issue #3)
+`siteConfig.navLinks` order kept as-is (Projects, Dashboard, GitHub, Skills, About, Contact). Verified every item resolves to an existing section id after the reorder: `#projects`→`projects`, `#dashboard`→`dashboard`, `#github`→`github`, `#skills`→`skills`, `#about`→`about`, `#contact`→`contact`. No config change was needed.
+
+### Validation
+- **`npm run lint`** → exit 0, clean ✅
+- **`npm run build`** → exit 0; 7 static routes, `/` still ISR (Revalidate 1h) ✅
+- **Prerendered-HTML checks:** section `id` order is `hero, dashboard, projects, github, skills, timeline, about, leadership, certifications, contact, coding-profiles`; all 6 navbar hash hrefs resolve to present ids. ✅
+- **Client-bundle check:** the shipped chunks contain the handler (`scrollIntoView`, `replaceState`, `prefers-reduced-motion`) — the interception is wired on the client, not dead server code. ✅
+- **Interactive click-through** (repeatably clicking each item / the Hero CTA from multiple scroll positions) is by-construction correct given the docs-confirmed root cause; it requires a browser and is left as the owner-run manual checklist.
+
+### Accessibility / constraints preserved
+Links stay real anchors with hash hrefs (keyboard/right-click/open-in-new-tab intact); smooth scrolling preserved but downgraded to instant under `prefers-reduced-motion`; no new animations; no feature-module changes; no spacing/typography edits beyond the scroll offset.
+
 ## 7. See Also
 
 - `ROADMAP.md` — single source of truth for milestone progress

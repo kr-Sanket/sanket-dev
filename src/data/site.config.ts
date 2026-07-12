@@ -28,6 +28,15 @@ export const siteConfig = {
     location: "India",
   },
 
+  // Competitive-programming usernames — owner-editable and the single source of
+  // truth for the Coding Profiles section. Leave a value empty ("") to omit that
+  // platform; nothing (link or stats) is shown for an empty username.
+  codingProfiles: {
+    leetcode: "",
+    codechef: "",
+    hackerrank: "",
+  },
+
   dashboard: {
     cgpa: { value: 8.69, label: "CGPA", icon: "graduation-cap" } as DashboardMetric,
     projects: { value: 3, label: "Projects", icon: "folder-kanban" } as DashboardMetric,

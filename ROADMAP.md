@@ -21,16 +21,18 @@
 - **Contact (4.8)** — `Contact` closing section (link cards, icon fallback, scheme-aware CTAs), driven entirely by `getContact()`.
 - **🏁 Homepage — COMPLETE.** All homepage sections shipped: Hero, Engineering Dashboard, Featured Projects, Skills, Engineering Timeline, About, Leadership, Certifications, Contact. (Current-mission content is surfaced in the Hero status panel via `getMission()`, so no separate section is needed.)
 - **GitHub Hub (5.1)** — live, ISR-cached (`revalidate=3600`) GitHub section under `src/features/github/`: reusable `github.service.ts`, profile summary, repo cards, language usage, activity feed, and a token-gated contribution heatmap; graceful fallback placeholder on API failure.
+- **Coding Profiles (5.2)** — ISR-cached (`revalidate=21600`) section under `src/features/coding-profiles/`: resilient `codingProfiles.service.ts` (LeetCode stats; CodeChef/HackerRank link-only), `ProfileCard` + `StatsDisplay`, `MetricCard` aggregate tiles; usernames from `siteConfig.codingProfiles`; graceful placeholder when unconfigured.
 - **Theme switching** and **Recruiter/Developer view mode** — both working (toggles in `Navbar`).
 - **Documentation Synchronization** — docs reconciled with the repository.
 
 ## 🚧 Current Milestone
 
-- **Coding Profiles (Phase 5)** — LeetCode/CodeChef/HackerRank stats via ISR (~6h) with JSON fallbacks. Awaiting owner approval before starting.
+- **Recruiter View** (`/recruiter`, `noindex`) — a purpose-built executive-summary page. Awaiting owner approval before starting.
 
 ## 📋 Next Milestones
 
-- **Recruiter View** (`/recruiter`, `noindex`) and the unique features (Project Mentor, Architecture Viewer).
+- Unique features: **Project Mentor** (client-side Fuse.js + TF-IDF) and **Architecture Viewer**.
+- Phase 6 polish: `not-found`, `sitemap.ts`, `robots.ts`, OG images, real assets.
 - Shared components still needed: `AnimatedCounter`, `ScrollReveal`.
 
 ## 🔮 Future
