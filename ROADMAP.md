@@ -2,7 +2,7 @@
 
 > Single source of truth for project progress. Concise by design — see
 > `IMPLEMENTATION_STATUS.md` for per-milestone detail and `DECISIONS.md` for the why.
-> Last synced: 2026-07-11.
+> Last synced: 2026-07-29.
 
 ## ✅ Completed
 
@@ -26,20 +26,21 @@
 - **Documentation Synchronization** — docs reconciled with the repository.
 - **Navigation & Homepage Flow (5.1.5)** — reliable in-page scroll nav (imperative `scrollToHash` fixes the same-hash re-click no-op) + homepage reorder (GitHub Hub moved up after Featured Projects).
 - **Recruiter View (5.3)** — SSG `/recruiter` (`noindex`) executive-summary page: Hero, Key Metrics, Featured Projects, Core Skills, Timeline Highlights, Leadership, Certifications, Contact. Consumes only `lib/recruiter.ts`, which aggregates the existing content layer; reuses `MetricCard`/`ProjectCard`/`Container`/`SectionHeader`.
+- **Project Mentor (5.4)** — client-side hybrid-search Q&A under `src/features/project-mentor/` (ADR-009: Fuse.js 0.4 + hand-rolled TF-IDF cosine 0.6, threshold 0.25, no external AI). `MentorChat` client island on every `/projects/[slug]` page; empty knowledge bases show the project's own fallback; behavioral suite 23/23 (correct top match or honest fallback — never a wrong answer).
 
 ## 🚧 Current Milestone
 
-- *(none in progress)* — next up is the Phase 4 unique features (see below). Awaiting owner direction.
+- *(none in progress)* — next up is the Architecture Viewer (see below). Awaiting owner direction.
 
 ## 📋 Next Milestones
 
-- Unique features: **Project Mentor** (client-side Fuse.js + TF-IDF) and **Architecture Viewer**.
+- Unique features: **Architecture Viewer** (the last one — Project Mentor shipped in 5.4).
 - Move **Coding Profiles** into the homepage flow directly after GitHub Hub (parked at the end today).
 - Phase 6 polish: `not-found`, `sitemap.ts`, `robots.ts`, OG images, real assets.
 - Shared components still needed: `AnimatedCounter`, `ScrollReveal`.
 
 ## 🔮 Future
 
-- **Phase 4 — Unique Features:** Project Mentor (client-side Fuse.js + TF-IDF), Architecture Viewer. *(Recruiter View shipped in 5.3.)*
+- **Phase 4 — Unique Features:** Project Mentor ✅ (5.4); Architecture Viewer remaining. *(Recruiter View shipped in 5.3.)*
 - **Phase 5 — Integrations:** GitHub Hub + Coding Profiles (ISR) ✅; `lib/recruiter.ts` aggregation ✅ (5.3).
 - **Phase 6 — Polish & Ship:** `not-found`, `sitemap.ts`, `robots.ts`, OG images, real assets (`public/images/**`, `resume.pdf`), accessibility + performance pass.

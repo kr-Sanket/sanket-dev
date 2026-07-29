@@ -16,9 +16,9 @@
 
 ## 2. Current Progress
 
-- **Completed:** Foundation → Application Shell → **entire Homepage** (Hero, Engineering Dashboard, Featured Projects, Skills, Engineering Timeline, About, Leadership, Certifications, Contact) → SSG project detail pages (`/projects/[slug]`) → **GitHub Hub** (ISR) → **Coding Profiles** (ISR). Theme switching + Recruiter/Developer view mode work end-to-end.
-- **Current milestone:** **Recruiter View** (`/recruiter`, `noindex`) — an executive-summary page. *Awaiting owner approval before starting.*
-- **Approximate completion:** **~75–80%.** Homepage and both live integrations are done; what remains is the recruiter route, the two remaining unique features, and Phase 6 polish/ship.
+- **Completed:** Foundation → Application Shell → **entire Homepage** (Hero, Engineering Dashboard, Featured Projects, Skills, Engineering Timeline, About, Leadership, Certifications, Contact) → SSG project detail pages (`/projects/[slug]`) → **GitHub Hub** (ISR) → **Coding Profiles** (ISR) → **Recruiter View** (`/recruiter`, `noindex`, 5.3) → **Project Mentor** (client-side hybrid search, 5.4). Theme switching + Recruiter/Developer view mode work end-to-end.
+- **Current milestone:** *(none in progress)* — next up is the **Architecture Viewer**, the last Phase 4 unique feature. *Awaiting owner direction.*
+- **Approximate completion:** **~85–90%.** Homepage, both live integrations, the recruiter route, and the Project Mentor are done; what remains is the Architecture Viewer and Phase 6 polish/ship.
 
 > The `~52%` figure and Phase Matrix inside `IMPLEMENTATION_STATUS.md §1` are historical/stale — trust `ROADMAP.md` for current status.
 
@@ -47,7 +47,9 @@ src/
   types/        project, timeline, github, coding-profile, common
 ```
 
-**Not yet present** (planned): `features/{project-mentor,architecture-viewer,recruiter-view}/`, `app/{recruiter,not-found,sitemap,robots}`, `src/hooks/`, `lib/recruiter.ts`, shared `AnimatedCounter`/`ScrollReveal`, `public/images/**` + `resume.pdf`.
+**Now also present:** `features/project-mentor/` (MentorChat + SearchEngine + tfidf + buildIndex), `app/recruiter/page.tsx`, `lib/recruiter.ts`, `lib/scroll.ts` + shared `HashLink`.
+
+**Not yet present** (planned): `features/architecture-viewer/`, `app/{not-found,sitemap,robots}`, `src/hooks/`, shared `AnimatedCounter`/`ScrollReveal`, `public/images/**` + `resume.pdf`.
 
 ## 5. Engineering Rules
 
@@ -81,9 +83,9 @@ src/
 
 *(summary — `ROADMAP.md` is the source of truth)*
 
-- **Completed:** Foundation, Application Shell, full Homepage (9 sections), Project detail pages, GitHub Hub, Coding Profiles, theme + view-mode toggles.
-- **Current:** Recruiter View (`/recruiter`, `noindex`) — awaiting owner approval.
-- **Next:** unique features — Project Mentor (Fuse.js + TF-IDF) and Architecture Viewer; shared `AnimatedCounter` + `ScrollReveal`.
+- **Completed:** Foundation, Application Shell, full Homepage (9 sections), Project detail pages, GitHub Hub, Coding Profiles, navigation flow (5.1.5), Recruiter View (5.3), Project Mentor (5.4), theme + view-mode toggles.
+- **Current:** *(none)* — awaiting owner direction.
+- **Next:** Architecture Viewer (last unique feature); move Coding Profiles up after GitHub Hub; shared `AnimatedCounter` + `ScrollReveal`.
 - **Future (Phase 6 polish & ship):** `not-found.tsx`, `sitemap.ts`, `robots.ts`, per-route OG images, real assets (`public/images/**`, `resume.pdf`), accessibility + performance pass, `lib/recruiter.ts` aggregation.
 
 ## 9. Standard Workflow

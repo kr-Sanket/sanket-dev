@@ -5,6 +5,7 @@ import {
 } from "@/features/project-mentor/buildIndex";
 import {
   cosineSimilarity,
+  tokenize,
   vectorizeQuery,
 } from "@/features/project-mentor/tfidf";
 import type { SearchResult } from "@/features/project-mentor/types";
@@ -53,13 +54,7 @@ export class SearchEngine {
     const trimmed = query.trim();
     if (!trimmed || this.isEmpty) return [];
 
-    // Fuzzy half: Fuse score is 0 (best) … 1 (worst) → similarity = 1 - score.
-    const fuzzyByIndex = new Map<number, number>();
-    for (const result of this.index.fuse.search(trimmed)) {
-      if (result.refIndex !== undefined) {
-        fuzzyByIndex.set(result.refIndex, 1 - (result.score ?? 1));
-      }
-    }
+    const fuzzyByIndex = this.fuzzySimilarities(trimmed);
 
     // Semantic half: cosine similarity of the query vs. each entry vector.
     const queryVector = vectorizeQuery(this.index.tfidf, trimmed);
@@ -79,5 +74,51 @@ export class SearchEngine {
       .filter((r) => r.score >= CONFIDENCE_THRESHOLD)
       .sort((a, b) => b.score - a.score)
       .slice(0, MAX_RESULTS);
+  }
+
+  /**
+   * Fuzzy similarity per entry index, in `[0, 1]`. Fuse bitap-matches its whole
+   * pattern, so a natural-language question ("why did you pick jenkins") scores
+   * poorly against short fields even when one word is an exact keyword hit. To
+   * fix that, each entry gets the best of:
+   *
+   * - the full-query similarity (favors queries close to an authored question),
+   * - the mean of per-token similarities (token coverage — favors queries whose
+   *   content words match, while a single stray token can't carry an off-topic
+   *   query past the threshold).
+   *
+   * Fuse similarity = `1 - score` (Fuse: 0 best … 1 worst). Tokens reuse the
+   * TF-IDF `tokenize` so both halves share one vocabulary discipline.
+   */
+  private fuzzySimilarities(query: string): Map<number, number> {
+    const fullQuery = new Map<number, number>();
+    for (const result of this.index.fuse.search(query)) {
+      if (result.refIndex !== undefined) {
+        fullQuery.set(result.refIndex, 1 - (result.score ?? 1));
+      }
+    }
+
+    const tokens = tokenize(query);
+    const tokenSums = new Map<number, number>();
+    for (const token of tokens) {
+      for (const result of this.index.fuse.search(token)) {
+        if (result.refIndex !== undefined) {
+          tokenSums.set(
+            result.refIndex,
+            (tokenSums.get(result.refIndex) ?? 0) + (1 - (result.score ?? 1))
+          );
+        }
+      }
+    }
+
+    const combined = new Map<number, number>();
+    const tokenCount = tokens.length || 1;
+    for (const i of new Set([...fullQuery.keys(), ...tokenSums.keys()])) {
+      combined.set(
+        i,
+        Math.max(fullQuery.get(i) ?? 0, (tokenSums.get(i) ?? 0) / tokenCount)
+      );
+    }
+    return combined;
   }
 }

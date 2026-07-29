@@ -719,6 +719,47 @@ No change. ADR-011 (SSG + `noindex` recruiter route) and ADR-010 (content-as-dat
 - No in-navbar link to `/recruiter` by design (private, link-shared). A dedicated recruiter-only layout (hide site nav) was **not** added — out of scope; the page lives within the standard app shell.
 - Next: Phase 4 unique features (Project Mentor, Architecture Viewer) — see `ROADMAP.md`.
 
+## 26. Milestone 5.4 — Project Mentor (2026-07-29)
+
+**Scope:** finalize the already-implemented Project Mentor feature — verify against ADR-009, polish only where necessary, validate, and document. No rebuild, no Architecture Viewer work, no changes to completed sections. **Status: ✅ complete — repo green.**
+
+### Files (feature, under `src/features/project-mentor/`)
+- `tfidf.ts` — hand-rolled TF-IDF + cosine similarity (no NLP dependency): shared `tokenize` (lowercase, stop-words, light stemmer), smoothed IDF (`ln((1+N)/(1+df)) + 1`), length-normalized TF, precomputed L2 norms.
+- `buildIndex.ts` — per-project index built once: Fuse instance (keys weighted question 0.4 / keywords 0.3 / topic 0.2 / answer 0.1, `ignoreLocation`, permissive threshold 0.6 — combined thresholding happens in `SearchEngine`) + TF-IDF model (keywords repeated in the document text as curated retrieval hints).
+- `SearchEngine.ts` — hybrid ranking per ADR-009: `0.4 × Fuse similarity + 0.6 × TF-IDF cosine`, confidence threshold `0.25`, top-3 results, stable `search(query): SearchResult[]` API, `isEmpty` for empty knowledge bases.
+- `MentorChat.tsx` — the client island: greeting, `role="log"` transcript in a `ScrollArea`, matched-topic badge on answers, input + submit, "Try asking" suggestion chips from the KB. Empty KB → header + the project's own `fallback` string, no input.
+- `types.ts` — `SearchResult`, `MentorMessage`.
+
+### Integration
+- `src/app/projects/[slug]/page.tsx` mounts `<MentorChat>` in a "Project Mentor" section (after Overview) on **every** project page; empty knowledge bases degrade to the fallback card by design (verified in prerendered HTML for all 3 projects: devops-api renders the interactive chat, fruit-quality-detection and adaptive-cyber-defense render the fallback with no input/chips).
+
+### Polish applied in this milestone (the only source changes)
+1. **`SearchEngine.ts` — token-aware fuzzy half.** Fuse bitap-matches its *whole* pattern, so natural paraphrases ("why did you pick jenkins") scored ~0.09 fuzzy despite an exact keyword hit, and correct top-ranked matches fell just below the 0.25 threshold. The fuzzy similarity is now `max(full-query sim, mean per-token sim)` — token coverage recovers paraphrases while a single stray token can't carry an off-topic query past the threshold. ADR-009 unchanged: same weights (0.4/0.6), same threshold (0.25), same public API — this is internal to the fuzzy half.
+2. **`MentorChat.tsx` — mount-scroll guard.** The transcript auto-scroll effect also ran on mount, and `scrollIntoView` scrolls *ancestor* containers — merely visiting a project page could jump the viewport toward the mentor card. Now skipped while only the greeting exists.
+3. **`MentorChat.tsx` — valid list markup.** The scroll sentinel `<div>` moved out of the `<ol>` (only `<li>` is a valid list child).
+
+### Validation (behavioral suite, real `devops-api` knowledge base)
+- **23/23 cases pass:** all 5 exact KB questions rank their own entry first; 9 paraphrase/keyword queries ("hardest part of the project?", "how do containers work here", "grafana prometheus observability", …) match the correct entry; 6 off-topic probes ("what is the meaning of life", "react hooks best practices", …) plus empty/whitespace queries all fall below threshold → honest fallback. **No query ever returned a wrong answer** (precision preserved by construction — fallback over weak matches).
+- **Invariants checked per query:** scores descending, all ≥ 0.25, ≤ 3 results; empty-KB engine returns `isEmpty` + no results.
+- **Known limitation (accepted):** a single-token typo with zero corpus overlap ("why terrafrom") returns the fallback — TF-IDF has no signal for unseen terms and the fuzzy half alone can't clear the ADR threshold. The fallback copy explicitly lists valid topics, which is the intended honest behavior.
+
+### ADR-009 conformance
+Fuse.js fuzzy (0.4) + hand-rolled TF-IDF cosine (0.6) ✅ · threshold 0.25 ✅ · static per-project fallback ✅ · zero external AI/API ✅ · stable `search()` surface for a future Transformers.js swap ✅. **No architectural change → no `DECISIONS.md`/`PROJECT_CONTEXT.md` edit.**
+
+### Accessibility / UX (verified in code + prerendered HTML)
+- Transcript is `<ol role="log" aria-live="polite">` with an accessible per-project label; section `h2` → card `h3`; decorative icons `aria-hidden`; input and submit carry descriptive `aria-label`s; suggestion chips are real `<button>`s with `focus-visible` rings; Base UI `ScrollArea` viewport is keyboard-focusable/scrollable.
+- Reduced-motion safe: no animations; auto-scroll uses default (instant) `scrollIntoView`.
+- Theme-consistent: semantic tokens only (`muted`, `foreground`, `border`); no gradients/glassmorphism; standard `Card` + section rhythm; responsive (`max-w-2xl` column, wrapping chips, `h-72` transcript).
+
+### Validation (repo)
+- **`npm run lint`** → exit 0, clean ✅
+- **`npm run build`** → exit 0; 8 routes, all 3 `/projects/[slug]` pages prerendered ✅
+- **Prerendered-HTML checks:** mentor section + greeting on all 3 pages; interactive form + chips only where the KB is populated; fallback copy only where it's empty. ✅
+
+### Notes / remaining work
+- fruit-quality-detection & adaptive-cyber-defense knowledge bases are empty (owner content, Milestone 1.5 placeholders) — the chat upgrades automatically when entries are authored, no code change.
+- Next: **Architecture Viewer** — the last Phase 4 unique feature (see `ROADMAP.md`).
+
 ## 7. See Also
 
 - `ROADMAP.md` — single source of truth for milestone progress

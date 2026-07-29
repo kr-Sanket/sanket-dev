@@ -70,8 +70,12 @@ function ActiveMentor({
   const endRef = useRef<HTMLDivElement>(null);
 
   // Keep the latest message in view when the transcript grows (no animation).
+  // Skipped while only the greeting exists — `scrollIntoView` also scrolls
+  // ancestor containers, so running on mount would jump the page to this card.
   useEffect(() => {
-    endRef.current?.scrollIntoView({ block: "nearest" });
+    if (messages.length > 1) {
+      endRef.current?.scrollIntoView({ block: "nearest" });
+    }
   }, [messages]);
 
   function ask(rawQuestion: string) {
@@ -136,8 +140,9 @@ function ActiveMentor({
               </p>
             </li>
           ))}
-          <div ref={endRef} aria-hidden />
         </ol>
+        {/* Scroll sentinel — outside the <ol> (only <li> may be a list child). */}
+        <div ref={endRef} aria-hidden />
       </ScrollArea>
 
       <form onSubmit={handleSubmit} className="flex items-center gap-2">
