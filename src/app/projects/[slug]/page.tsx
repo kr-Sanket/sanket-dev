@@ -16,6 +16,7 @@ import { Container } from "@/components/layout/Container";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { DualModeText } from "@/components/shared/DualModeText";
+import { MentorChat } from "@/features/project-mentor/MentorChat";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -74,6 +75,18 @@ export default async function ProjectDetailPage({
             content={project.overview}
             className="max-w-3xl text-base leading-relaxed text-muted-foreground"
           />
+        </Section>
+
+        {/* Project Mentor — client-side hybrid-search Q&A (ADR-009). Renders on
+            every project; empty knowledge bases show the graceful fallback. */}
+        <Section
+          id="mentor"
+          title="Project Mentor"
+          eyebrow="Ask about this project"
+        >
+          <div className="max-w-2xl">
+            <MentorChat mentor={project.mentor} projectTitle={project.title} />
+          </div>
         </Section>
 
         {/* Architecture — static layout only (no interactive viewer yet) */}
