@@ -686,6 +686,39 @@ After: **Hero → Dashboard → Projects → GitHub → Skills → Timeline → 
 ### Accessibility / constraints preserved
 Links stay real anchors with hash hrefs (keyboard/right-click/open-in-new-tab intact); smooth scrolling preserved but downgraded to instant under `prefers-reduced-motion`; no new animations; no feature-module changes; no spacing/typography edits beyond the scroll offset.
 
+## 25. Milestone 5.3 — Recruiter View (`/recruiter`) (2026-07-12)
+
+**Scope:** the private, `noindex` executive-summary route only. No homepage section was changed, no site redesign, no architecture change. **Status: ✅ complete — repo green.**
+
+### Files created (2)
+- `src/lib/recruiter.ts` — the recruiter page's **single data source**. `getRecruiterData()` aggregates the existing content layer (`getFeaturedProjects`, `getSkills`, `getTimeline`, `getLeadership`, `getCertifications`, `getAbout`, `getContact`) plus `site.config.ts` (identity, `status`, `dashboard`, `social`) into one typed `RecruiterData` object. It only selects/trims/orders — no data is duplicated or invented. Also exports `recruiterMetadata` (built via the shared `createMetadata`, forcing `robots: { index: false, follow: false }`).
+- `src/app/recruiter/page.tsx` — async server component, SSG. Consumes **only** `lib/recruiter.ts`. Eight sections in order: **Hero** (name, role, About bio, availability, location, primary "Get in touch" CTA + GitHub/LinkedIn/Resume links) → **Key Metrics** (reuses `MetricCard`; CGPA/Projects/Repositories/Certifications) → **Featured Projects** (reuses `ProjectCard` with real detail links; recruiter `impact` surfaced by the card) → **Core Skills** (compact grouped cards, skills joined with `·` — no chip clouds) → **Timeline Highlights** (only `milestone`/`project-end`/`achievement` events) → **Leadership** (compact cards) → **Certifications** (compact cards, image-free) → **Contact** (simple CTA button row). `export const metadata = recruiterMetadata`.
+
+### Files modified (2)
+- `ROADMAP.md` — moved Recruiter View to Completed; refreshed Current/Next/Future (incl. `lib/recruiter.ts` now done).
+- `IMPLEMENTATION_STATUS.md` — this entry.
+
+### Design / reuse decisions
+- **Aggregation-only data layer (no duplication):** the page never touches `content.ts`/JSON/`siteConfig` directly — it reads one shaped object from `recruiter.ts`. Featured projects use `getFeaturedProjects()` (already `order`-sorted, `featured`-filtered) rather than re-filtering `getProjects()`.
+- **100% component reuse:** `Container`, `SectionHeader` (its `<h2>`), `MetricCard`, `ProjectCard`, `StatusBadge` (via `ProjectCard`), `Card`, `Badge`, `buttonVariants`, `cn`, `ROUTES.project`. No new shared/section component was introduced; the only new UI is the page's local `Section` wrapper + an icon-name→lucide map (same pattern as `EngineeringDashboard`/`Contact`, with a `Cpu` fallback).
+- **`noindex` (ADR-011):** enforced in `recruiterMetadata` — the prerendered HTML carries `<meta name="robots" content="noindex, nofollow">`. No sitemap/robots wiring needed (Phase 6).
+- **No fabrication:** recruiter `impact` still hidden by `ProjectCard` when it's a `TODO`/empty placeholder; cert date/credential and skill descriptions render only when present; the cert image is intentionally omitted in this compact view (asset doesn't exist).
+- **Premium/minimal aesthetic:** section rhythm `py-16 sm:py-20`, header `mb-8`, `Card` `rounded-xl`, `1→2→3`/`2→4` grids, mono labels, shared ring-lift hover — consistent with the homepage. No gradients/glassmorphism/new animations.
+- **Accessibility:** single `<h1>` (name) → section `<h2>` → card `<h3>`; timeline is a semantic `<ol role="list">`; decorative icons `aria-hidden`; external links `rel="noopener noreferrer"`; contact links carry descriptive `aria-label`s; responsive with no overflow.
+
+### Architecture
+No change. ADR-011 (SSG + `noindex` recruiter route) and ADR-010 (content-as-data via the access layer) were already settled and are honored here — hence **no `DECISIONS.md`/`PROJECT_CONTEXT.md` edit**.
+
+### Validation
+- **`npm run lint`** → exit 0, clean (no warnings) ✅
+- **`npm run build`** → exit 0; **8 static routes**, `/recruiter` prerendered as **static (SSG)** ✅
+- **Prerendered-HTML checks:** `<meta name="robots" content="noindex, nofollow">` present; `<h1>` = "Sanket Kumar"; seven `<h2>`s in order (Key Metrics → Featured Projects → Core Skills → Highlights → Leadership → Certifications → Get in touch); metric values 8.69 / 3 / 15 / 1; availability "Open to opportunities" + location "India"; all 3 featured projects; skills joined with `·`; hero CTAs resolve to `mailto:` + `/resume.pdf`. ✅
+
+### Notes / remaining work
+- Email (`sanket@example.com`) and `/resume.pdf` are still owner placeholders (site-wide) — the CTAs upgrade automatically when real values/assets land.
+- No in-navbar link to `/recruiter` by design (private, link-shared). A dedicated recruiter-only layout (hide site nav) was **not** added — out of scope; the page lives within the standard app shell.
+- Next: Phase 4 unique features (Project Mentor, Architecture Viewer) — see `ROADMAP.md`.
+
 ## 7. See Also
 
 - `ROADMAP.md` — single source of truth for milestone progress

@@ -24,19 +24,22 @@
 - **Coding Profiles (5.2)** — ISR-cached (`revalidate=21600`) section under `src/features/coding-profiles/`: resilient `codingProfiles.service.ts` (LeetCode stats; CodeChef/HackerRank link-only), `ProfileCard` + `StatsDisplay`, `MetricCard` aggregate tiles; usernames from `siteConfig.codingProfiles`; graceful placeholder when unconfigured.
 - **Theme switching** and **Recruiter/Developer view mode** — both working (toggles in `Navbar`).
 - **Documentation Synchronization** — docs reconciled with the repository.
+- **Navigation & Homepage Flow (5.1.5)** — reliable in-page scroll nav (imperative `scrollToHash` fixes the same-hash re-click no-op) + homepage reorder (GitHub Hub moved up after Featured Projects).
+- **Recruiter View (5.3)** — SSG `/recruiter` (`noindex`) executive-summary page: Hero, Key Metrics, Featured Projects, Core Skills, Timeline Highlights, Leadership, Certifications, Contact. Consumes only `lib/recruiter.ts`, which aggregates the existing content layer; reuses `MetricCard`/`ProjectCard`/`Container`/`SectionHeader`.
 
 ## 🚧 Current Milestone
 
-- **Recruiter View** (`/recruiter`, `noindex`) — a purpose-built executive-summary page. Awaiting owner approval before starting.
+- *(none in progress)* — next up is the Phase 4 unique features (see below). Awaiting owner direction.
 
 ## 📋 Next Milestones
 
 - Unique features: **Project Mentor** (client-side Fuse.js + TF-IDF) and **Architecture Viewer**.
+- Move **Coding Profiles** into the homepage flow directly after GitHub Hub (parked at the end today).
 - Phase 6 polish: `not-found`, `sitemap.ts`, `robots.ts`, OG images, real assets.
 - Shared components still needed: `AnimatedCounter`, `ScrollReveal`.
 
 ## 🔮 Future
 
-- **Phase 4 — Unique Features:** Project Mentor (client-side Fuse.js + TF-IDF), Architecture Viewer, Recruiter View (`/recruiter`, `noindex`).
-- **Phase 5 — Integrations:** GitHub Hub + Coding Profiles (ISR), `lib/recruiter.ts` aggregation.
+- **Phase 4 — Unique Features:** Project Mentor (client-side Fuse.js + TF-IDF), Architecture Viewer. *(Recruiter View shipped in 5.3.)*
+- **Phase 5 — Integrations:** GitHub Hub + Coding Profiles (ISR) ✅; `lib/recruiter.ts` aggregation ✅ (5.3).
 - **Phase 6 — Polish & Ship:** `not-found`, `sitemap.ts`, `robots.ts`, OG images, real assets (`public/images/**`, `resume.pdf`), accessibility + performance pass.
