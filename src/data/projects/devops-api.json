@@ -8,13 +8,11 @@
   "thumbnail": "/images/projects/devops-api/thumbnail.webp",
   "coverImage": "/images/projects/devops-api/cover.webp",
   "timeline": {
-    "startDate": "2025-01",
-    "endDate": "2025-04",
+    "startDate": "2025-05",
+    "endDate": "2025-07",
     "milestones": [
-      { "date": "2025-01", "label": "Project started" },
-      { "date": "2025-02", "label": "CI/CD pipeline operational" },
-      { "date": "2025-03", "label": "Dockerized + Terraform deployed" },
-      { "date": "2025-04", "label": "Monitoring with Grafana complete" }
+      { "date": "2025-05", "label": "Project started" },
+      { "date": "2025-07", "label": "Monitoring with Grafana complete" }
     ]
   },
   "overview": {

@@ -1,4 +1,5 @@
 import type { DashboardMetric } from "@/types/common";
+import type { CodingProfileLink } from "@/types/coding-profile";
 
 export const siteConfig = {
   name: "Sanket Kumar",
@@ -32,20 +33,37 @@ export const siteConfig = {
     targetRoles: ["Software Engineer", "Backend Engineer", "DevOps Engineer"],
   },
 
-  // Competitive-programming usernames — owner-editable and the single source of
-  // truth for the Coding Profiles section. Leave a value empty ("") to omit that
-  // platform; nothing (link or stats) is shown for an empty username.
-  codingProfiles: {
-    leetcode: "",
-    codechef: "",
-    hackerrank: "",
-  },
+  // Coding profiles — owner-editable, the single source of truth for the
+  // Coding Profiles section (static link cards, no fetched stats — ADR-015).
+  // An empty array hides the section entirely.
+  codingProfiles: [
+    {
+      platform: "LeetCode",
+      username: "SANKET_2912",
+      url: "https://leetcode.com/u/SANKET_2912/",
+      description: "Algorithmic problem solving and interview preparation.",
+      icon: "leetcode",
+      brandColor: "#FFA116",
+    },
+    {
+      platform: "GeeksforGeeks",
+      username: "kumarsankgkax",
+      url: "https://www.geeksforgeeks.org/profile/kumarsankgkax",
+      description: "Computer science fundamentals and programming practice.",
+      icon: "geeksforgeeks",
+      brandColor: "#2F8D46",
+    },
+  ] satisfies readonly CodingProfileLink[],
 
+  // Dashboard metric definitions. Only CGPA's `value` is authoritative
+  // (owner-attested, no derivable source). The other `value`s are dead
+  // placeholders — real counts are derived in `lib/metrics.ts` from the
+  // projects/certifications data and the live GitHub API.
   dashboard: {
     cgpa: { value: 8.69, label: "CGPA", icon: "graduation-cap" } as DashboardMetric,
-    projects: { value: 3, label: "Projects", icon: "folder-kanban" } as DashboardMetric,
-    repositories: { value: 15, label: "Repositories", icon: "git-branch" } as DashboardMetric,
-    certifications: { value: 3, label: "Certifications", icon: "award" } as DashboardMetric,
+    projects: { value: 0, label: "Projects", icon: "folder-kanban" } as DashboardMetric,
+    repositories: { value: 0, label: "Repositories", icon: "git-branch" } as DashboardMetric,
+    certifications: { value: 0, label: "Certifications", icon: "award" } as DashboardMetric,
   },
 
   projectStatuses: {

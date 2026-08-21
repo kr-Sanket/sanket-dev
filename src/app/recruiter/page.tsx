@@ -1,16 +1,17 @@
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
-  Activity,
   ArrowUpRight,
   Award,
   Brain,
   Code,
+  Container as ContainerIcon,
   Cpu,
   Database,
   Download,
   FolderKanban,
   GitBranch,
+  Globe,
   GraduationCap,
   Mail,
   Server,
@@ -36,10 +37,12 @@ const ICON_MAP: Record<string, LucideIcon> = {
   "git-branch": GitBranch,
   award: Award,
   code: Code,
+  globe: Globe,
   server: Server,
-  database: Database,
+  container: ContainerIcon,
   brain: Brain,
-  activity: Activity,
+  database: Database,
+  cpu: Cpu,
 };
 
 const MONTHS = [

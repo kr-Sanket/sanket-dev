@@ -1,9 +1,10 @@
 import {
-  Activity,
   Brain,
   Code,
+  Container as ContainerIcon,
   Cpu,
   Database,
+  Globe,
   Server,
   type LucideIcon,
 } from "lucide-react";
@@ -17,10 +18,12 @@ import { SECTION_IDS } from "@/lib/constants";
 // Same pattern as EngineeringDashboard; unknown names fall back to a generic icon.
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
   code: Code,
+  globe: Globe,
   server: Server,
-  database: Database,
+  container: ContainerIcon,
   brain: Brain,
-  activity: Activity,
+  database: Database,
+  cpu: Cpu,
 };
 
 /**

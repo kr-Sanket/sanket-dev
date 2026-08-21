@@ -8,10 +8,10 @@
   "thumbnail": "/images/projects/adaptive-cyber-defense/thumbnail.webp",
   "coverImage": "/images/projects/adaptive-cyber-defense/cover.webp",
   "timeline": {
-    "startDate": "2025-06",
+    "startDate": "2026-03",
     "endDate": null,
     "milestones": [
-      { "date": "2025-06", "label": "Research started" }
+      { "date": "2026-03", "label": "Research started" }
     ]
   },
   "overview": {

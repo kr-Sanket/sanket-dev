@@ -18,6 +18,7 @@ import {
   getTimeline,
 } from "@/lib/content";
 import { createMetadata } from "@/lib/metadata";
+import { getDashboardMetrics } from "@/lib/metrics";
 import { siteConfig } from "@/data/site.config";
 import type { Project } from "@/types/project";
 import type {
@@ -112,10 +113,15 @@ function buildHero(): RecruiterHero {
   };
 }
 
-/** The four headline metrics, in a fixed executive order. */
-function buildMetrics(): RecruiterMetric[] {
-  const { cgpa, projects, repositories, certifications } = siteConfig.dashboard;
-  return [cgpa, projects, repositories, certifications].map((m) => ({
+/**
+ * Headline metrics — derived via the shared `getDashboardMetrics()` (single
+ * source of truth; no duplicated counts). Repositories are excluded here so
+ * this route stays pure SSG (the GitHub fetch would pull it into ISR) —
+ * which also drops the weakest recruiter metric per the P2 review.
+ */
+async function buildMetrics(): Promise<RecruiterMetric[]> {
+  const metrics = await getDashboardMetrics({ includeRepositories: false });
+  return metrics.map((m) => ({
     value: m.value,
     label: m.label,
     icon: m.icon,
@@ -132,7 +138,10 @@ function sortByDate<T extends { date: string }>(items: T[]): T[] {
  * projects are filesystem-backed.
  */
 export async function getRecruiterData(): Promise<RecruiterData> {
-  const featuredProjects = await getFeaturedProjects();
+  const [featuredProjects, metrics] = await Promise.all([
+    getFeaturedProjects(),
+    buildMetrics(),
+  ]);
 
   const timelineHighlights = sortByDate(
     getTimeline().events.filter((e) => HIGHLIGHT_TYPES.has(e.type))
@@ -140,7 +149,7 @@ export async function getRecruiterData(): Promise<RecruiterData> {
 
   return {
     hero: buildHero(),
-    metrics: buildMetrics(),
+    metrics,
     featuredProjects,
     skillGroups: getSkills().categories,
     timelineHighlights,

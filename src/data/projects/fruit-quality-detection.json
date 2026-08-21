@@ -8,10 +8,10 @@
   "thumbnail": "/images/projects/fruit-quality-detection/thumbnail.webp",
   "coverImage": "/images/projects/fruit-quality-detection/cover.webp",
   "timeline": {
-    "startDate": "2025-05",
+    "startDate": "2025-02",
     "endDate": null,
     "milestones": [
-      { "date": "2025-05", "label": "Project started" }
+      { "date": "2025-02", "label": "Project started during a hackathon" }
     ]
   },
   "overview": {

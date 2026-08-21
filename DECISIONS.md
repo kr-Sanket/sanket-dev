@@ -159,6 +159,19 @@
 
 ---
 
+## ADR-015 — Coding Profiles: static config links, stats service retired  ✅ (2026-08-22)
+
+**Context.** Milestone 5.2 built an ISR (6h) stats service around LeetCode's unofficial GraphQL endpoint, with CodeChef/HackerRank link-only and a "coming soon" placeholder while usernames were unconfigured. The owner then supplied real profiles (LeetCode + GeeksforGeeks) and specified pure link cards — logo, name, username, description, CTA — with an explicit "no statistics" rule.
+
+**Decision.** Coding profiles are now **static, owner-configured link data** (`siteConfig.codingProfiles: CodingProfileLink[]`) rendered at build time. `codingProfiles.service.ts` and `StatsDisplay.tsx` were deleted; the old fetching types were replaced. An empty array hides the section entirely (no placeholder). Platform glyphs are official Simple Icons path data rendered inline with `currentColor` — monochrome by default, official brand color only on hover via a per-card CSS variable (honoring the design system's semantic-color budget).
+
+**Consequences.**
+- ADR-011's "coding profiles ~6h ISR" clause is superseded; the homepage's ISR now comes solely from the GitHub Hub (1h). Fewer unofficial-API dependencies, one less failure mode.
+- Adding a platform = one config entry (+ one glyph in the feature's icon map if new).
+- If live stats are ever wanted again, 5.2's service pattern is preserved in git history (§23).
+
+---
+
 ## Open Confirmations (❓)
 
 - **ADR-003:** Accept neutral/grayscale tokens, or restore the planned blue primary accent?

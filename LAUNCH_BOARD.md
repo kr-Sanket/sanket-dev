@@ -27,7 +27,7 @@
 - [x] **Research project impact** — ✅ Sprint 1.3: honest value statements in `recruiterSummary.impact` for both projects ("Automates visual fruit-quality classification…", "Investigates how machine learning can help network defenses adapt…") — derived strictly from existing data, no metrics invented; now rendered on homepage + recruiter cards. [owner]
 - [ ] **Research project developer overviews** — still open: real developer-mode `overview` text needs owner knowledge (model architecture/dataset for FQD; threat model/techniques for ACD). TODO strings remain in data but are never rendered. [owner]
 - [x] **Fresh timeline signal (site-wide)** — ✅ Sprint 1.4: 4 documented 2026 events added to `timeline.json` from git/doc history (portfolio start, homepage + integrations, recruiter view + mentor, architecture viewer); homepage timeline and recruiter Highlights now end Aug 2026. [code]
-- [ ] **Fresh milestones for FQD/ACD project timelines** — still open: each project's own `timeline.milestones` has only its 2025 "started" entry; recent progress milestones need owner knowledge. [owner]
+- [ ] **Fresh milestones for FQD project timeline** — partially resolved by the 2026-08-22 verified-dates correction: ACD's start is now Mar 2026 (recent — staleness resolved); FQD's only milestone is Feb 2025 (hackathon start) with nothing since — a recent progress milestone still needs owner knowledge. DevOps API's removed intermediate milestones can also be re-added with real dates. [owner]
 - [x] **Verify LinkedIn URL** — ✅ owner provided the production URL (`linkedin.com/in/sanket-kumar-515bb228a`); applied to `siteConfig.social` + `contact.json`; old URL verified gone from every prerendered page. [owner]
 
 ## Sprint 2 — Production (SEO + deployment hygiene)
@@ -71,7 +71,7 @@
 **Site-wide:**
 - [ ] Skip-to-content link onto existing `#main`. [code]
 - [ ] Move Coding Profiles directly after GitHub Hub in the homepage flow (existing roadmap item). [code]
-- [ ] Coding-profile usernames in `siteConfig.codingProfiles` (section shows placeholder until set). [owner]
+- [x] Coding-profile usernames — ✅ 2026-08-22: real LeetCode + GeeksforGeeks profiles as static link cards (ADR-015); placeholder removed, stats service retired. [owner]
 
 ## Sprint 4 — Engineering Cleanup (from P4 audit)
 

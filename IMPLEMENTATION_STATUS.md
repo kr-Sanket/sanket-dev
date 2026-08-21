@@ -1275,6 +1275,95 @@ Palette is exactly the brief's three tones — warmth behind the person, a desat
 ### Validation
 - **`npm run lint`** → exit 0 ✅ · **`npm run build`** → exit 0; 12 routes ✅ (no code changed — confirms docs-only).
 
+## 49. Coding Profiles — Real Profile Cards (2026-08-22)
+
+**Scope:** replace the "coming soon" placeholder with two real, config-driven profile cards (ADR-015). **Status: ✅ complete — repo green.**
+
+### Files created (1) / modified (4) / deleted (2)
+- **Created** `features/coding-profiles/icons.tsx` — official LeetCode + GeeksforGeeks glyphs (Simple Icons path data; lucide has no brand marks), `currentColor` fill.
+- **Modified** `src/data/site.config.ts` — `codingProfiles` is now `CodingProfileLink[]` (platform, username, url, description, icon key, brandColor) holding the owner's two real profiles (LeetCode `SANKET_2912` · GfG `kumarsankgkax`, values verbatim); `src/types/coding-profile.ts` — new `CodingProfileLink` (old fetching shapes removed); `ProfileCard.tsx` — full rewrite (see below); `CodingProfiles.tsx` — sync server component; **empty config → section returns `null`** (placeholder removed entirely).
+- **Deleted** `codingProfiles.service.ts` + `StatsDisplay.tsx` (superseded; no fabricated or fetched stats anywhere).
+
+### Card design (design-system conformant)
+Whole card is one link (`target="_blank" rel="noopener noreferrer"`, descriptive aria-label); the "View Profile ↗" button is a presentational `buttonVariants` span (nested anchors are invalid). Muted icon box + platform `h3` + mono `@username` + description. **Hover:** subtle lift (`-translate-y-0.5`) + slightly deeper light-only shadow (`dark:group-hover:shadow-none` — dark stays tonal) + ring step + **logo transitions from monochrome to the official brand color** via a per-card `--brand` CSS variable (chroma spent only on hover, per the color budget) + arrow nudges right. Keyboard: `group-focus-visible` ring on the card. All motion `motion-reduce`-guarded. Grid 1 → 2 columns.
+
+### Validation
+- **`npm run lint`** → exit 0 ✅ · **`npm run build`** → exit 0; 12 routes ✅
+- **Prerendered checks:** placeholder gone; exactly 2 card links with correct URLs/usernames/descriptions; both official glyph paths inline; `--brand:#FFA116`/`#2F8D46` vars; 2 "View Profile" buttons; all hover classes (lift/shadow/brand/arrow); noopener ×2; ≥6 motion-reduce guards. ✅
+
+## 50. Verified Timeline & Leadership Correction (2026-08-22)
+
+**Scope:** owner-verified date corrections across the site timeline, leadership role, and the three project JSONs' own timelines. Data-only. **Status: ✅ complete — repo green. All dates below are owner-provided facts, superseding the earlier data.**
+
+### Corrected facts (old → new)
+| Event | Old | Verified |
+|---|---|---|
+| B.Tech start (CSE — Data Science, VIT Vellore) | 2024-08 | **2023-08** |
+| Senior Core Member appointed | 2025-06 | **2025-01** (role **completed**: Jan–Dec 2025, not ongoing) |
+| Fruit Quality Detection started | 2025-05 | **2025-02** (during a hackathon) |
+| DevOps To-Do API started | 2025-01 | **2025-05** |
+| DevOps To-Do API completed | 2025-04 | **2025-07** |
+| Adaptive Cyber Defense research started | 2025-06 | **2026-03** |
+
+### Files modified (7)
+- `src/data/timeline.json` — the six verified events (existing content-true descriptions retained where they didn't conflict; owner wording used for the new facts), followed by the four git-verified portfolio events (2026-06 → 2026-08, unchanged — non-conflicting and they preserve the recency signal). 10 events, chronological.
+- `src/data/leadership.json` — `period`: "2025 — Present" → **"Jan 2025 — Dec 2025"** (completed role).
+- `src/data/projects/devops-api.json` — `timeline` 2025-01/2025-04 → **2025-05/2025-07**. ⚠️ The two intermediate milestones ("CI/CD pipeline operational" @2025-02, "Dockerized + Terraform deployed" @2025-03) were **removed, not re-dated** — their true months inside the corrected May–July window are unknowable and inventing dates is forbidden. Owner can re-add them with real dates (JSON-only).
+- `src/data/projects/fruit-quality-detection.json` — start **2025-02**; milestone label now "Project started during a hackathon" (owner's fact).
+- `src/data/projects/adaptive-cyber-defense.json` — start **2026-03**.
+- `ROADMAP.md`, `LAUNCH_BOARD.md` (freshness item re-annotated: ACD's verified 2026-03 start resolves its staleness; FQD remains the one project without a recent milestone).
+
+### Validation
+- **`npm run lint`** → exit 0 ✅ · **`npm run build`** → exit 0; 12 routes ✅
+- **Prerendered checks:** homepage timeline = 10 events, strictly chronological (2023-08 → 2026-08), all corrected titles present, old dates absent; **recruiter Highlights** correctly re-filtered (Aug 2023 · Jan 2025 · Jul 2025 · Jul 2026 ×2 · Aug 2026); leadership badge "Jan 2025 — Dec 2025"; project pages show May–Jul 2025 (devops), Feb 2025 + hackathon (FQD), Mar 2026 (ACD). ✅
+
+### Consistency notes
+- Graduation "May 2027" (Sprint 1.1) + B.Tech start 2023-08 = a standard 4-year program ✓.
+- `about.json`'s "Senior Core Member, Geospatial Club" highlight is tenseless and remains true for a completed role — unchanged.
+- Historical doc entries (§8, §34) retain the old dates as records of what was believed at the time; this entry is the correction of record.
+
+## 51. Skills & Technologies Refresh (2026-08-22)
+
+**Scope:** owner-provided current skill set replaces the old five categories; data + icon-map keys only, UI untouched. **Status: ✅ complete — repo green.**
+
+### Files modified (4)
+- `src/data/skills.json` — 7 categories, owner's lists verbatim: Languages (Java, Python, C, C++, JavaScript) · Web Technologies (HTML, CSS, React.js, Angular, Node.js, Django) · Backend (Java, Node.js, Django, REST APIs) · DevOps & Infrastructure (Docker, Jenkins, Terraform, Ansible, Git, Grafana) · AI & ML (TensorFlow, PyTorch, OpenCV) · Databases (Oracle SQL, MySQL, Firebase) · Computer Science (DSA, OOP, Compiler Design, OS, AI, Cloud Computing). **Removed:** Kubernetes, AWS, Spring Boot (per owner) — plus TypeScript and the Observability category (Prometheus dropped; Grafana moved into DevOps), which followed from the owner's exhaustive list.
+- `src/sections/Skills.tsx` + `src/app/recruiter/page.tsx` — icon maps extended with `globe`/`container`/`cpu` (Web Technologies, DevOps, Computer Science) and stale `activity` removed, so **both surfaces resolve identical icons** (no Cpu-fallback drift between pages).
+- `ROADMAP.md`.
+
+### Notes
+- Reuses the existing `SkillCategory` card and 1→2→3 grid unchanged; 7 cards = 3+3+1 rows on desktop. No proficiency bars/percentages (verified absent).
+- **Consistency effects:** removing Kubernetes resolves the P2 review's "K8s listed as skill but only a future improvement in projects" credibility wrinkle. Spring Boot/AWS remain visible on the devops-api project page via its `techStack` — correct: project pages document what a project used; the skills section claims current capabilities.
+
+### Validation
+- **`npm run lint`** → exit 0 ✅ · **`npm run build`** → exit 0; 12 routes ✅
+- **Prerendered checks:** homepage shows exactly the 7 categories in order with every listed skill present and none missing; Kubernetes/AWS/Spring Boot/Prometheus/TypeScript absent from the section; no `%` anywhere in it; recruiter Core Skills shows all 7 groups with the same removals. ✅
+
+## 52. Engineering Dashboard — Derived Metrics Refactor (2026-08-22)
+
+**Scope:** every dashboard count now derives from its single source of truth; no hardcoded numbers (CGPA excepted — owner-attested, no derivable source). **Status: ✅ complete — repo green.**
+
+### Files created (1) / modified (4)
+- **Created** `src/lib/metrics.ts` — `getDashboardMetrics(options?)`: the one derivation point both surfaces consume (no duplicated counts anywhere). `siteConfig.dashboard` now supplies labels/icons only for derived metrics (its placeholder `value`s documented as dead).
+- **Modified** `src/sections/EngineeringDashboard.tsx` — async pure summary layer over the helper; UI unchanged (same MetricCard grid/band). `src/lib/recruiter.ts` — `buildMetrics()` now async over the shared helper with `includeRepositories: false`. `src/data/site.config.ts` — dashboard comment + dead placeholder values. `ROADMAP.md`.
+
+### Metric sources (exact)
+| Metric | Source |
+|---|---|
+| CGPA | `siteConfig.dashboard.cgpa.value` (owner-attested config) |
+| Projects | `getProjects().length` — count of `src/data/projects/*.json` |
+| Repositories | `getGitHubData().repos.length` — live GitHub API (ISR 1h, fetch deduped with the GitHub Hub); **tile hidden when the API yields nothing** (a fake 0 would misreport failure as fact) |
+| Certifications | `getCertifications().certifications.length` — `certifications.json` |
+
+### Notable outcomes
+- **The hardcoded repo count was wrong:** config said 15; the live count of non-fork public repos is **4**. The refactor replaced a false number with the truth — exactly why derived metrics matter.
+- **Recruiter Key Metrics drops Repositories** — deliberate: including it would require the GitHub fetch, pulling `/recruiter` from pure SSG into ISR (ADR-011 keeps it SSG), and the P2 review had already called it the weakest recruiter metric. Recruiter now shows CGPA · Projects · Certifications, all derived/shared.
+- SSR preserved throughout; homepage ISR unchanged (1h); GitHub failure path = hidden tile (grid handles 3 items), matching the site's no-fabrication fallback convention.
+
+### Validation
+- **`npm run lint`** → exit 0 ✅ · **`npm run build`** → exit 0; 12 routes, `/recruiter` still `○` static, `/` still 1h ISR ✅
+- **Prerendered checks:** dashboard tiles = 8.69 CGPA · 3 Projects · **4 Repositories (live)** · 3 Certifications; recruiter = CGPA/Projects/Certifications only. ✅
+
 ## 7. See Also
 
 - `ROADMAP.md` — single source of truth for milestone progress

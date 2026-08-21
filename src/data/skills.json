@@ -3,27 +3,44 @@
     {
       "name": "Languages",
       "icon": "code",
-      "skills": ["Python", "Java", "TypeScript"]
+      "skills": ["Java", "Python", "C", "C++", "JavaScript"]
     },
     {
-      "name": "DevOps & Infrastructure",
-      "icon": "server",
-      "skills": ["Docker", "Kubernetes", "Terraform", "Jenkins", "AWS"]
+      "name": "Web Technologies",
+      "icon": "globe",
+      "skills": ["HTML", "CSS", "React.js", "Angular", "Node.js", "Django"]
     },
     {
       "name": "Backend",
-      "icon": "database",
-      "skills": ["Spring Boot"]
+      "icon": "server",
+      "skills": ["Java", "Node.js", "Django", "REST APIs"]
+    },
+    {
+      "name": "DevOps & Infrastructure",
+      "icon": "container",
+      "skills": ["Docker", "Jenkins", "Terraform", "Ansible", "Git", "Grafana"]
     },
     {
       "name": "AI & Machine Learning",
       "icon": "brain",
-      "skills": ["TensorFlow", "OpenCV"]
+      "skills": ["TensorFlow", "PyTorch", "OpenCV"]
     },
     {
-      "name": "Observability",
-      "icon": "activity",
-      "skills": ["Prometheus", "Grafana"]
+      "name": "Databases",
+      "icon": "database",
+      "skills": ["Oracle SQL", "MySQL", "Firebase"]
+    },
+    {
+      "name": "Computer Science",
+      "icon": "cpu",
+      "skills": [
+        "Data Structures & Algorithms",
+        "Object-Oriented Programming",
+        "Compiler Design",
+        "Operating Systems",
+        "Artificial Intelligence",
+        "Cloud Computing"
+      ]
     }
   ]
 }

@@ -8,7 +8,7 @@ import {
 import { Container } from "@/components/layout/Container";
 import { SectionHeader } from "@/components/layout/SectionHeader";
 import { MetricCard } from "@/components/shared/MetricCard";
-import { siteConfig } from "@/data/site.config";
+import { getDashboardMetrics } from "@/lib/metrics";
 import { SECTION_IDS } from "@/lib/constants";
 
 // Resolve the content layer's icon-name strings to lucide components.
@@ -19,8 +19,15 @@ const METRIC_ICONS: Record<string, LucideIcon> = {
   award: Award,
 };
 
-export function EngineeringDashboard() {
-  const metrics = Object.values(siteConfig.dashboard);
+/**
+ * Engineering Dashboard — a pure summary layer over `getDashboardMetrics()`:
+ * every count is derived from its single source of truth (project files,
+ * certifications data, live GitHub API); only CGPA is owner-attested config.
+ * Async server component; the GitHub-backed tile hides itself when the API
+ * yields nothing rather than reporting a fake zero.
+ */
+export async function EngineeringDashboard() {
+  const metrics = await getDashboardMetrics();
 
   return (
     <section
