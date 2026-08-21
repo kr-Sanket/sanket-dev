@@ -49,7 +49,10 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
+  /* Light theme depth: the page sits slightly below pure white so white
+     cards (+ their soft shadow, see ui/card.tsx) lift off it — mirrors the
+     dark theme's 0.145-page / 0.205-card tonal separation. */
+  --background: oklch(0.985 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);

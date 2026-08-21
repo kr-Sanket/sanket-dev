@@ -41,7 +41,10 @@ export async function GitHubHub() {
   const languageCount = Object.keys(languages).length;
 
   return (
-    <section id={SECTION_IDS.github} className="border-b border-border/60">
+    <section
+      id={SECTION_IDS.github}
+      className="border-b border-border/60 bg-muted/60 dark:bg-muted/15"
+    >
       <Container className="py-16 sm:py-20">
         <SectionHeader
           eyebrow="Open source"

@@ -48,7 +48,10 @@ export async function EngineeringTimeline() {
   const ordered = [...events].sort((a, b) => a.date.localeCompare(b.date));
 
   return (
-    <section id={SECTION_IDS.timeline} className="border-b border-border/60">
+    <section
+      id={SECTION_IDS.timeline}
+      className="border-b border-border/60 bg-muted/60 dark:bg-muted/15"
+    >
       <Container className="py-16 sm:py-20">
         <SectionHeader
           eyebrow="Journey"

@@ -23,7 +23,10 @@ export function EngineeringDashboard() {
   const metrics = Object.values(siteConfig.dashboard);
 
   return (
-    <section id={SECTION_IDS.dashboard} className="border-b border-border/60">
+    <section
+      id={SECTION_IDS.dashboard}
+      className="border-b border-border/60 bg-muted/60 dark:bg-muted/15"
+    >
       <Container className="py-16 sm:py-20">
         <SectionHeader
           eyebrow="At a glance"

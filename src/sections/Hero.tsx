@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { ArrowRight, ArrowUpRight, Download } from "lucide-react";
 import { Container } from "@/components/layout/Container";
 import { HashLink } from "@/components/shared/HashLink";
+import { HeroAmbientScene } from "@/components/shared/HeroAmbientScene";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -18,7 +19,14 @@ export function Hero() {
   const mission = getMission();
 
   return (
-    <section id={SECTION_IDS.hero} className="border-b border-border/60">
+    <section
+      id={SECTION_IDS.hero}
+      className="relative isolate overflow-hidden border-b border-border/60"
+    >
+      {/* Ambient hero scene (Phase 2.6) — three art-directed soft lights
+          with a few px of cursor parallax. Replaces the Phase-2 single top
+          wash, whose shading role the scene's neutral light absorbs. */}
+      <HeroAmbientScene />
       <Container className="grid items-center gap-12 py-16 sm:py-20 lg:min-h-[calc(100svh-4rem)] lg:grid-cols-[1fr_minmax(0,26rem)] lg:gap-16 lg:py-0">
         {/* ── Left: identity — small intro → name → role → tagline → focus → CTAs ── */}
         <div className="flex flex-col items-start">
@@ -35,7 +43,10 @@ export function Hero() {
 
           <div className="mt-6 flex flex-wrap gap-2">
             {focusAreas.map((area) => (
-              <Badge key={area} variant="secondary">
+              // Outline over `secondary`: the 0.97 secondary fill washed out
+              // against the Phase-1 off-white page; a hairline chip stays quiet
+              // but legible on both themes.
+              <Badge key={area} variant="outline" className="bg-card/60">
                 {area}
               </Badge>
             ))}
@@ -44,10 +55,10 @@ export function Hero() {
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <HashLink
               href={`#${SECTION_IDS.projects}`}
-              className={cn(buttonVariants({ size: "lg" }), CTA_SIZE)}
+              className={cn(buttonVariants({ size: "lg" }), CTA_SIZE, "group")}
             >
               View Projects
-              <ArrowRight />
+              <ArrowRight className="transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0" />
             </HashLink>
             <a
               href={social.github}
@@ -55,11 +66,12 @@ export function Hero() {
               rel="noopener noreferrer"
               className={cn(
                 buttonVariants({ variant: "outline", size: "lg" }),
-                CTA_SIZE
+                CTA_SIZE,
+                "group"
               )}
             >
               GitHub
-              <ArrowUpRight />
+              <ArrowUpRight className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0 motion-reduce:group-hover:translate-y-0" />
             </a>
             {social.resume && (
               <a
@@ -109,13 +121,18 @@ function EngineeringStatusPanel({
   research?: string;
 }) {
   return (
-    <Card className="w-full gap-0 p-0">
-      <div className="flex items-center justify-between px-5 py-4">
+    // The hero's visual anchor: one step more elevation than the site's
+    // standard card (deeper ambient shadow, light only) plus a quiet
+    // console-style title bar. Dark keeps its tonal system.
+    <Card className="w-full gap-0 p-0 shadow-[0_1px_2px_rgb(0_0_0/0.05),0_12px_32px_-12px_rgb(0_0_0/0.12)] dark:shadow-none">
+      <div className="flex items-center justify-between bg-muted/40 px-5 py-4">
         <span className="font-mono text-xs tracking-widest text-muted-foreground uppercase">
           Engineering Status
         </span>
         <span className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
-          <span className="size-2 rounded-full bg-emerald-500" aria-hidden />
+          <span className="relative flex size-2" aria-hidden>
+            <span className="absolute inset-0 animate-pulse rounded-full bg-emerald-500 motion-reduce:animate-none" />
+          </span>
           Active
         </span>
       </div>

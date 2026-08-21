@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ViewModeProvider } from "@/components/providers/ViewModeProvider";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { AmbientBackground } from "@/components/shared/AmbientBackground";
 import { createMetadata, getStructuredDataJson } from "@/lib/metadata";
 
 const inter = Inter({
@@ -38,6 +39,8 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: getStructuredDataJson() }}
         />
+        {/* Ambient cursor light — one line to remove to disable the system. */}
+        <AmbientBackground />
         <ThemeProvider>
           <ViewModeProvider>
             <Navbar />

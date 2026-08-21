@@ -21,7 +21,10 @@ export function Leadership() {
   if (roles.length === 0) return null;
 
   return (
-    <section id={SECTION_IDS.leadership} className="border-b border-border/60">
+    <section
+      id={SECTION_IDS.leadership}
+      className="border-b border-border/60 bg-muted/60 dark:bg-muted/15"
+    >
       <Container className="py-16 sm:py-20">
         <SectionHeader
           eyebrow="Beyond code"

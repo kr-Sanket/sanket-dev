@@ -51,7 +51,10 @@ export function Contact() {
   if (links.length === 0) return null;
 
   return (
-    <section id={SECTION_IDS.contact} className="border-b border-border/60">
+    <section
+      id={SECTION_IDS.contact}
+      className="border-b border-border/60 bg-muted/60 dark:bg-muted/15"
+    >
       <Container className="py-16 sm:py-20">
         <SectionHeader
           eyebrow="Get in touch"

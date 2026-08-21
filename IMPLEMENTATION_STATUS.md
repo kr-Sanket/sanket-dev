@@ -1137,6 +1137,144 @@ A brand-new Claude session reading `CLAUDE_START.md` (+ `ROADMAP.md` + `LAUNCH_B
 - Route table (12), file tree (viewer feature, SEO routes, resume.pdf, cert logos), data values (email, LinkedIn, graduation, certs ×3, timeline ×10 events, impact statements) all cross-checked against the docs during this pass — no doc claims a feature that doesn't exist; no shipped feature is undocumented.
 - Repo untouched by this pass except documentation files; `npm run lint` / `npm run build` state unchanged from §41 (green, 12 routes).
 
+## 43. UI Polish Sprint 1 — Visual Foundation, Light Theme (2026-08-21)
+
+**Scope:** Phase 1 of the UI-polish roadmap (full review + phased roadmap recorded in the session report): light-theme depth only — page/card plane separation, card elevation, section rhythm. No layout, typography, spacing, or dark-theme identity changes. **Status: ✅ complete — repo green.**
+
+### Root cause (review finding)
+Light theme had `--background` **and** `--card` at `oklch(1 0 0)` with zero shadows — every surface on one plane, separated only by 10%-black hairlines (hence "flat, documentation-like"). Dark already separates tonally (page 0.145 / card 0.205).
+
+### Files modified (7)
+- `src/app/globals.css` — light `--background` → `oklch(0.985 0 0)` (compiles to `#fafafa`); `--card` stays white. Dark block untouched.
+- `src/components/ui/card.tsx` — quiet two-layer shadow (`0 1px 2px rgb(0 0 0/0.04), 0 3px 10px -2px rgb(0 0 0/0.06)`) + `dark:shadow-none` (dark separates tonally by design). Every Card consumer site-wide (MetricCard, ProjectCard, mentor, viewer panel, cert/skill/leadership cards, recruiter cards) inherits the elevation.
+- Section bands `bg-muted/60 dark:bg-muted/15` on **Dashboard, GitHub Hub, Timeline, Leadership, Contact** (`EngineeringDashboard/GitHubHub/EngineeringTimeline/Leadership/Contact`.tsx) — alternating ~`#f5f5f5` bands on the `#fafafa` page in light; near-imperceptible matching lift in dark for cross-theme structural consistency.
+
+### Design decisions
+- **Mirror the dark theme's depth model instead of inventing a new one:** off-white page + white shadowed cards = the light equivalent of 0.145/0.205. No gradients, glass, or decoration.
+- **Shadows in light only** — dark's tonal card contrast is its elevation system; stacking shadows there would muddy it.
+- **Alternation via existing section elements** (they already carry full-width `border-b` separators) — zero layout/spacing change; recruiter/project pages inherit background + card elevation but keep band-free flow (their own rhythm; candidate for a later phase).
+- **Contrast checked:** `muted-foreground` (#737373-ish) on `#fafafa` ≈ 4.6:1 — still AA for body text; band areas put text on white cards.
+
+### Validation
+- **`npm run lint`** → exit 0 ✅ · **`npm run build`** → exit 0; 12 routes ✅
+- **Compiled-output checks:** `--background:#fafafa` (+ lab fallback) in light, `#0a0a0a` dark unchanged; card shadow + `dark:shadow-none` utilities present; band utilities (`bg-muted/60`, dark `/15`) present; homepage HTML shows bands on exactly dashboard/github/timeline/leadership/contact and nowhere else; all cards carry the shadow class. ✅
+
+## 44. UI Polish Sprint — Phase 2: Hero Refinement (2026-08-21)
+
+**Scope:** Hero only — class-level refinement; zero layout/typography/spacing/content/responsiveness changes. Builds on the Phase-1 depth model (§43). **Status: ✅ complete — repo green.**
+
+### Review findings addressed
+1. Hero was the only homepage zone with **no background treatment** post-Phase-1 (flat opening viewport while siblings have bands).
+2. The Engineering Status panel — the documented "visual anchor" — read as just another card once Phase 1 equalized all cards.
+3. `secondary` focus badges (0.97 fill) **washed out against the new 0.985 page**.
+4. Static "Active" dot undercut the live-console metaphor.
+5. CTAs had color-only hover — no micro-response.
+
+### Files modified (3)
+- `src/sections/Hero.tsx` —
+  - **Top wash:** decorative `aria-hidden` radial vignette (`h-80`, `-z-10`, section `relative isolate overflow-hidden`): light `rgb(0 0 0/0.04)`, dark `rgb(255 255 255/0.05)` — barely-there, bounded, no mesh/large gradient.
+  - **Status panel as anchor:** one step more elevation than the standard card (`0 12px 32px -12px /0.12` ambient, light only, `dark:shadow-none`) + a `bg-muted/40` console-style title bar; "Active" dot now `animate-pulse motion-reduce:animate-none`.
+  - **Focus badges:** `secondary` → `outline` with `bg-card/60` (legible on the off-white page, still quiet, both themes).
+  - **CTA micro-response:** arrow icons nudge on hover (`group` + `transition-transform group-hover:translate-x-0.5`, GitHub arrow also `-translate-y-0.5`), fully `motion-reduce`-guarded.
+- `ROADMAP.md`, `IMPLEMENTATION_STATUS.md` (this entry).
+
+### Design decisions
+- Every change is additive class-work on existing elements — no new components/abstractions; the 3.2 hero structure, grid, and heading scale are untouched (verified in prerendered HTML).
+- Dark theme identity preserved: wash becomes the faint standard dark glow; shadows stay off (`dark:shadow-none`); title bar + pulse read identically in both themes.
+- All motion (arrow nudge, pulse) is decorative, tiny, and disabled under `prefers-reduced-motion`.
+
+### Validation
+- **`npm run lint`** → exit 0 ✅ · **`npm run build`** → exit 0; 12 routes ✅
+- **Prerendered checks:** wash div (radial, aria-hidden, `-z-10`, `isolate`) present; outline badges with `bg-card/60`; CTA `group-hover` transitions with ≥3 `motion-reduce:` guards; panel deep shadow + `bg-muted/40` title bar + guarded pulse; hero grid + `text-5xl/sm:text-6xl` unchanged. ✅
+
+## 45. UI Polish Sprint — Phase 2.5: Ambient Background Interaction (2026-08-21)
+
+**Scope:** one ambient cursor-responsive background system — a single reusable client component, mounted once. No other visuals touched. **Status: ✅ complete — repo green.**
+
+### Files created (1)
+- `src/components/shared/AmbientBackground.tsx` — `"use client"`. A viewport-fixed, clipped (`fixed inset-0 -z-10 overflow-hidden`), non-interactive (`pointer-events-none`, `aria-hidden`) layer containing one 60rem (~960px) radial light. Colors reuse the hero-wash neutral family: **light** `rgb(0 0 0/0.035)` center → transparent 70% (reads as diffuse depth on the off-white page); **dark** `rgb(255 255 255/0.02)` (even more restrained, per spec). Soft edge comes from the gradient stops — no blur filter, no extra GPU cost.
+
+### Files modified (2)
+- `src/app/layout.tsx` — mounts `<AmbientBackground />` as the first body child with a "one line to remove" comment. Behind body content by stacking (negative z child paints above the body background, below in-flow content): **opaque cards occlude the light; the `/60`–`/15` section bands let it half-diffuse through** — literally light under the paper planes.
+- `ROADMAP.md` + this entry.
+
+### Motion & performance architecture
+- **cursor → target refs → exponential lerp → transform.** `mousemove` (passive) only writes plain locals; a rAF loop applies `translate3d(x,y,0)` + `opacity` (compositor-only properties, `will-change` hinted). Position lerp `0.06`/frame = the mandated organic lag; exponential interpolation by construction has no snap/spring/bounce.
+- **Zero React state, zero re-renders** — the component renders once; all animation is direct style mutation.
+- **Self-suspending loop:** when position deltas < 0.05px and opacity settles, the rAF chain stops; any input restarts it. An idle page runs no frames.
+- **Graceful exit:** `documentElement mouseleave` fades `targetOpacity → 0` through the same lerp.
+- **Guards:** skipped entirely on coarse pointers (`pointer: fine` check — touch devices ship the div at opacity 0 and attach nothing); `prefers-reduced-motion` ignores input *and* fades the light out, including live OS-setting changes via the media-query `change` listener.
+
+### Design decisions
+- Single-responsibility system: no listeners anywhere else in the app; deleting the one layout line disables everything.
+- Neutral colors only (the existing black/white wash family) — no blobs/aurora/mesh/particles/color.
+- Initial SSR state is `opacity-0` — no hydration flash, invisible until the first pointer movement.
+
+### Validation
+- **`npm run lint`** → exit 0 ✅ · **`npm run build`** → exit 0; 12 routes ✅
+- **Prerendered checks:** ambient container SSR'd with `opacity-0`, 60rem light, `will-change`, both theme gradients (0.035 / 0.02); mounted before all content. **Client bundle** contains the rAF loop, `translate3d`, `pointer: fine`, `prefers-reduced-motion`, and `mouseleave` wiring. ✅
+
+## 46. Ambient Background — Phase 2.5.1 Tuning Pass (2026-08-21)
+
+**Scope:** visual tuning of §45's ambient system only — architecture (single component, ref-only state, self-suspending rAF, compositor-only mutation, all guards) unchanged. **Status: ✅ complete — repo green.**
+
+### What was tuned (all in `AmbientBackground.tsx`)
+| Parameter | Before | After | Why |
+|---|---|---|---|
+| Light size | 60rem (960px) | **84rem (1344px)** atmosphere field | Too small for the hero; spec target 1200–1500px — larger + softer |
+| Falloff | single stop → transparent 70% (linear-ish) | **eased multi-stop** (center → 40% alpha at 45% → transparent 80%) | Dissolves invisibly into the page — no perceptible edge |
+| Light strength | black 3.5% center | **black 5% → 2% → 0** | 3.5% averaged ~1% over the field — imperceptible on desktop; 5% center reads as atmosphere, not spotlight |
+| Dark strength | white 2% | **white 3% → 1.2% → 0** | Same feel-parity bump, still more restrained than light |
+| Interpolation | 0.06 single rate | **0.045 field / 0.09 core** | Slower field = longer, perceivable organic drift; still exponential (no snap/spring/bounce) |
+| Second layer | — | **36rem core, black 2% / white 1.5%, transparent 75%, faster lag** | Permitted by spec: same neutral palette, different size + lag, extremely low opacity. The **differential drift** between layers is what makes the ambience felt without any layer becoming a visible blob |
+
+### Color experiment (documented per task)
+- **White illumination:** rejected — the page is `#fafafa`; pure-white light can shift it ≤1.5%, physically too weak.
+- **Warm neutral:** rejected — introduces chroma into a deliberately 0-chroma design system.
+- **Winner:** existing neutral black/white family at higher strength with eased falloff.
+
+### Validation
+- **`npm run lint`** → exit 0 ✅ · **`npm run build`** → exit 0; 12 routes ✅
+- **Prerendered/bundle checks:** two layers SSR'd (`84rem` + `36rem`, both `opacity-0` + `will-change`), eased stops (45%/80%), light 0.05/0.02 + dark 0.03/0.015 gradients, dual lerp rates in the client bundle. Guards (`pointer: fine`, reduced-motion, `mouseleave`) untouched. ✅
+
+## 47. Phase 2.6 — Ambient Hero Scene (2026-08-21)
+
+**Scope:** an art-directed, hero-scoped ambient scene (three soft lights + gentle cursor parallax). No homepage redesign; hero layout/typography/content verified unchanged. **Status: ✅ complete — repo green.**
+
+### Files created (1)
+- `src/components/shared/HeroAmbientScene.tsx` — `"use client"`. Absolute `inset-0 -z-10 overflow-hidden` layer inside the hero (which is already `relative isolate`), containing three gradient lights (soft edges via radial stops — **no blur filters, zero filter cost**):
+  1. **Warm white** (`rgb(255 247 235)/0.55` light · `/0.04` dark) — 50rem, upper-left, behind the identity column.
+  2. **Soft blue-gray** (slate `rgb(148 163 184)/0.09` light · `/0.07` dark) — 44rem, right, the cool plane the Engineering Status panel floats above (its Phase-2 elevated shadow now has a field to cast onto).
+  3. **Neutral gray** (`rgb(0 0 0)/0.03` light · white `/0.02` dark) — 56rem, low center-left, grounding the composition and absorbing the former Phase-2 top-wash role.
+
+### Files modified (3)
+- `src/sections/Hero.tsx` — the Phase-2 single top-wash div replaced by `<HeroAmbientScene />` (the scene's neutral light carries its shading function); import added. Nothing else touched.
+- `ROADMAP.md` + this entry.
+
+### Parallax (not chasing)
+Lights are **position-fixed**; the cursor only offsets them: normalized viewport position (−0.5…0.5) × per-light depth factors **[14, −18, 9] px max** (within the 10–20px spec; opposing signs create depth), heavily lerped (0.05/frame) via the established ref-only, self-suspending rAF pattern writing compositor-only `translate3d`. Passive listener; skipped on coarse pointers (scene renders **statically** — "premium before any interaction" holds on touch); `prefers-reduced-motion` disables parallax and drifts lights back to rest (live setting changes handled). This is the app's second and only other mouse listener, single-responsibility like `AmbientBackground` (global trailing light vs. hero-scoped parallax — different jobs, kept separate deliberately).
+
+### Design rationale
+Palette is exactly the brief's three tones — warmth behind the person, a desaturated cool slate behind the engineering console, neutral ground — at opacities that read as *atmosphere*, not color (no saturation, mesh, aurora, particles, glass). The site remains unmistakably neutral sanket.dev; the blue-gray is a shadow-tone, not a "cyber" blue.
+
+### Validation
+- **`npm run lint`** → exit 0 ✅ · **`npm run build`** → exit 0; 12 routes ✅
+- **Prerendered checks:** scene container + exactly 3 lights (6 gradient classes incl. dark variants), `will-change-transform` ×3, old wash removed, hero grid/typography classes unchanged; parallax depths + normalization in the client bundle. ✅
+
+## 48. Design System v1.0 Established (2026-08-21)
+
+**Scope:** documentation — `DESIGN_SYSTEM.md`, the product's visual constitution. No application code touched. **Status: ✅ complete.**
+
+### Files created (1)
+- `DESIGN_SYSTEM.md` (repo root) — Version 1.0. Not a styling guide (deliberately contains no implementation detail — no class names, frameworks, or tokens): it governs *visual decisions* the way `DECISIONS.md` governs technical ones. Chapters: Purpose · Visual North Star ("designed to build trust, not impress through spectacle; the interface disappears behind the work") · Design Philosophy (engineering over decoration, light over color, depth over effects, content over animation, calm over excitement, purpose over trends, evidence over marketing) · Brand Personality (and explicit anti-registers: not flashy / cyberpunk / startup-hype / gaming) · **Material Language** (Canvas → Section → Paper → Elevated Paper → Floating Surface → Overlay — every surface must belong to exactly one) · Lighting Philosophy (illuminated not decorated; temperature guides attention; shadows = elevation only; theme-native depth cues) · Color Philosophy (color is expensive; semantic-only: status/charts/architecture/metrics/GitHub) · Typography Philosophy (type as primary interface; whitespace load-bearing; no marketing copy) · Motion Philosophy (physics; everything settles; reduced-motion users get the complete product) · Signature Components (Status Panel, Architecture Viewer, Project Mentor, Dual Mode, GitHub Hub — with *why* each earns the polish budget) · **Things We Never Do** (permanent list; amendments must be written) · Design Review Checklist (7 questions; one honest "no" = stop) · Closing Statement.
+
+### Notes
+- The document codifies the visual language actually built through Phases 1–2.6 (depth model, lighting system, chroma discipline) and the principles distilled from the reference-image analysis — it records reality, it doesn't invent future features.
+- Written in the `DECISIONS.md`/`CLAUDE_START.md` register; intended to be read alongside them (ADRs = engineering constitution, this = visual constitution).
+
+### Validation
+- **`npm run lint`** → exit 0 ✅ · **`npm run build`** → exit 0; 12 routes ✅ (no code changed — confirms docs-only).
+
 ## 7. See Also
 
 - `ROADMAP.md` — single source of truth for milestone progress
