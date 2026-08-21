@@ -1,11 +1,28 @@
 {
   "certifications": [
     {
-      "title": "AWS Certified Cloud Practitioner",
-      "issuer": "Amazon Web Services",
+      "title": "Devops, Agile & Design Thinking",
+      "issuer": "IBM Career Education Program (Powered by IBM Developer Skills Network)",
+      "date": "July 21, 2026",
+      "image": "",
+      "url": "https://courses.vit.skillsnetwork.site/certificates/75d8ebf87e984f89988111cc6fa8540f",
+      "logo": "/images/certifications/ibm.svg"
+    },
+    {
+      "title": "DevOps Fundamentals",
+      "issuer": "IBM Career Education Program (Powered by IBM Developer Skills Network)",
+      "date": "June 30, 2025",
+      "image": "",
+      "url": "https://courses.vit.skillsnetwork.site/certificates/f74578e2d6ff41ffbeb0e5fd8fa6e01e",
+      "logo": "/images/certifications/ibm.svg"
+    },
+    {
+      "title": "Java Programming",
+      "issuer": "GeeksforGeeks",
       "date": "",
-      "image": "/images/certifications/aws-cloud-practitioner.webp",
-      "url": ""
+      "image": "",
+      "url": "https://media.geeksforgeeks.org/courses/certificates/e527559fc381a9728bfad3e47d87e5f6.pdf",
+      "logo": "/images/certifications/geeksforgeeks.svg"
     }
   ]
 }

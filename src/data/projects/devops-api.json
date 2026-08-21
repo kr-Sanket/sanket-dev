@@ -40,18 +40,87 @@
         "id": "jenkins",
         "label": "Jenkins",
         "icon": "settings",
+        "x": 1,
+        "y": 0,
+        "details": {
+          "purpose": "CI/CD orchestration server",
+          "whyChosen": "Mature ecosystem with extensive plugin support. Self-hosted gives full control over pipeline configuration, including the custom executor environment needed for Docker-in-Docker builds.",
+          "configNotes": "Jenkinsfile with declarative pipeline. Stages: Checkout → Build → Test → Docker Build → Terraform Apply → Health Check. Try-catch-finally error handling with post-stage Slack notifications; parallel test execution cut pipeline time from 12 to 6 minutes.",
+          "lessonsLearned": "Pipeline-as-code is critical. Storing Jenkinsfile in the repo ensures CI config is versioned alongside application code. Making the pipeline reliable and idempotent was the biggest challenge — solved with proper error handling, health-check stages, and Terraform plan as a gate."
+        }
+      },
+      {
+        "id": "junit",
+        "label": "JUnit 5",
+        "icon": "shield",
         "x": 0,
         "y": 1,
         "details": {
-          "purpose": "CI/CD orchestration server",
-          "whyChosen": "Mature ecosystem with extensive plugin support. Self-hosted gives full control over pipeline configuration.",
-          "configNotes": "Jenkinsfile with declarative pipeline. Stages: Checkout → Build → Test → Docker Build → Terraform Apply → Health Check.",
-          "lessonsLearned": "Pipeline-as-code is critical. Storing Jenkinsfile in the repo ensures CI config is versioned alongside application code."
+          "purpose": "Automated unit and integration test suite, executed in the pipeline's Test stage as the quality gate before any image is built.",
+          "whyChosen": "",
+          "configNotes": "Unit and integration tests run in the Jenkins Test stage with parallel execution (part of cutting pipeline time from 12 to 6 minutes). Results are reported in Jenkins through its JUnit integration.",
+          "lessonsLearned": ""
+        }
+      },
+      {
+        "id": "docker",
+        "label": "Docker",
+        "icon": "container",
+        "x": 1,
+        "y": 1,
+        "details": {
+          "purpose": "Containerizes the Spring Boot API so the same image runs identically across development, testing, and production.",
+          "whyChosen": "Environment consistency across development, testing, and production — the same image moves through every stage.",
+          "configNotes": "Multi-stage Dockerfile reduces the final image from ~800MB to ~120MB, with layers ordered for cache reuse during CI rebuilds. Images are built in the pipeline's Docker Build stage via Docker-in-Docker on Jenkins.",
+          "lessonsLearned": "CI Docker builds initially broke due to cache invalidation issues — build caching has to be treated as part of pipeline reliability, not an afterthought."
+        }
+      },
+      {
+        "id": "terraform",
+        "label": "Terraform",
+        "icon": "cloud",
+        "x": 2,
+        "y": 1,
+        "details": {
+          "purpose": "Provisions the AWS infrastructure (VPC, EC2, RDS) declaratively, applied automatically by the pipeline.",
+          "whyChosen": "Declarative approach to infrastructure, cloud-agnostic design, and excellent state management.",
+          "configNotes": "Modularized into reusable modules for VPC, EC2, and RDS. Remote state stored in S3 with DynamoDB locking. Runs in the pipeline's Terraform Apply stage, gated by terraform plan.",
+          "lessonsLearned": "Treat infrastructure like software — versioned, reviewed, reproducible. Occasional state drift caused failed applies until terraform plan became a gate before every apply."
+        }
+      },
+      {
+        "id": "prometheus",
+        "label": "Prometheus",
+        "icon": "database",
+        "x": 1,
+        "y": 2,
+        "details": {
+          "purpose": "Collects application metrics by scraping Spring Boot Actuator endpoints.",
+          "whyChosen": "",
+          "configNotes": "Scrapes Spring Boot Actuator. Key metrics: request latency (p50/p95/p99), error rates, JVM memory usage, and API endpoint hit counts.",
+          "lessonsLearned": ""
+        }
+      },
+      {
+        "id": "grafana",
+        "label": "Grafana",
+        "icon": "gauge",
+        "x": 2,
+        "y": 2,
+        "details": {
+          "purpose": "Visualizes Prometheus metrics on dashboards and drives alerting for the running API.",
+          "whyChosen": "",
+          "configNotes": "Dashboards cover request latency, error rates, and JVM memory usage. Alerting fires on error-rate spikes and high response times.",
+          "lessonsLearned": ""
         }
       }
     ],
     "edges": [
-      { "from": "github", "to": "jenkins", "label": "Webhook Trigger" }
+      { "from": "github", "to": "jenkins", "label": "Webhook Trigger" },
+      { "from": "jenkins", "to": "junit", "label": "Test" },
+      { "from": "jenkins", "to": "docker", "label": "Docker Build" },
+      { "from": "jenkins", "to": "terraform", "label": "Terraform Apply" },
+      { "from": "prometheus", "to": "grafana", "label": "Metrics" }
     ]
   },
   "techStack": [

@@ -123,9 +123,46 @@
 
 ---
 
+## ADR-012 — SEO surface: robots allow-all + page-level noindex; sitemap from the slug source  ✅ (2026-08-21)
+
+**Context.** Launch prep needed `robots.txt` and `sitemap.xml` (Sprint 2). `/recruiter` must stay out of indexes (ADR-011) and `planned` projects must never be listed.
+
+**Decision.**
+- `robots.ts`: `userAgent: *`, `allow: /`, **no per-page disallows** — `/recruiter`'s exclusion mechanism is its page-level `noindex, nofollow` meta; a robots `Disallow` would prevent crawlers from ever *seeing* that directive. Sitemap URL from `siteConfig.url`.
+- `sitemap.ts`: entries built from `getProjectSlugs()` + `ROUTES.project()` — the exact pair `generateStaticParams` uses, so the sitemap **cannot drift** from the built routes and exclusions (`/recruiter`, 404, planned) hold by construction, not by denylist.
+- **`lastModified` omitted deliberately:** no trustworthy per-page source exists (git checkout mtimes are meaningless in CI; project timeline dates describe the work, not the page; the build date would fake sitewide freshness on every deploy).
+
+**Consequences.** Adding a project JSON updates the sitemap automatically. If a real per-page modification signal ever exists in data, `lastModified` is a two-line addition.
+
+---
+
+## ADR-013 — OG images: build-time generation + shared image declared in `createMetadata`  ✅ (2026-08-21)
+
+**Context.** Metadata declared `twitter.card: summary_large_image` with no image anywhere (P4 finding). A root `opengraph-image.tsx` file convention alone proved insufficient: **Next's metadata resolution replaces a parent's `openGraph` object wholesale when a child segment exports its own metadata**, so the injected image only reached `/`.
+
+**Decision.**
+- Generate the card at build time (`ImageResponse` from `next/og`, 1200×630) from `siteConfig` only — no static image asset, no fonts introduced (bundled default). `twitter-image.tsx` re-exports it for an explicit `twitter:image` tag.
+- Declare the image (`/opengraph-image`, w/h/alt) as the **default `openGraph.images`/`twitter.images` inside `createMetadata`**, so every page that uses the helper carries it regardless of the resolution semantics above.
+- **Merge-bug fix (load-bearing):** `createMetadata` previously ended with a top-level `...overrides` spread that silently **replaced** the merged `openGraph` object for any caller passing openGraph overrides — project pages had lost `og:site_name` (and would have lost images). Overrides are now destructured: `openGraph`/`twitter` merge key-by-key; the rest spreads at top level. **Do not reintroduce a blanket `...overrides`.**
+
+**Consequences.** Exactly one `og:image` + one `twitter:image` on every page; the card updates when `siteConfig` changes (e.g. availability). Colors are hex equivalents of the dark tokens (satori can't resolve CSS variables).
+
+---
+
+## ADR-014 — JSON-LD: one centralized Person + WebSite `@graph`; emit only trustworthy fields  ✅ (2026-08-21)
+
+**Context.** Structured data for launch (Sprint 2.5) with hard no-fabrication rules.
+
+**Decision.** One `<script type="application/ld+json">` rendered server-side from the root layout; generation centralized in `lib/metadata.ts` (`getStructuredData`/`getStructuredDataJson`, `<`-escaped per the Next JSON-LD guide). Schema: `@graph` of **Person** (`/#person`) + **WebSite** (`/#website`, publisher → Person `@id`). **Field policy:** emit only values already maintained in `siteConfig` — name, url, jobTitle (role), description, public email (already rendered site-wide), `sameAs` (GitHub/LinkedIn), `knowsAbout` (focusAreas). **Omitted:** `image` (no real headshot; the OG card is branding, not a person photo), structured VIT affiliation (exists only inside a display string — would be parsing, not reuse). `ProfilePage`/per-project `SoftwareSourceCode` considered and deferred (page-level placement breaks the single-block design; project pages lack distinguishing artifacts today).
+
+**Consequences.** Exactly one schema block per page, zero client JS, updates with `siteConfig` alone. Add page-specific schemas later only alongside real page-specific artifacts.
+
+---
+
 ## Open Confirmations (❓)
 
 - **ADR-003:** Accept neutral/grayscale tokens, or restore the planned blue primary accent?
-- Owner contact email and `resume.pdf` are still placeholders.
+- Production domain: `https://sanket.dev` is assumed by metadata/sitemap/JSON-LD — owner must confirm or correct before deploy.
+- Analytics: adopt Vercel Analytics or ship without?
 
-_(Resolved: **ADR-001** — Next.js 16 accepted as the project baseline; **ADR-004** — providers mounted.)_
+_(Resolved: **ADR-001** — Next.js 16 accepted as the project baseline; **ADR-004** — providers mounted; **contact placeholders** — real email, resume.pdf, and LinkedIn URL all landed in Sprint 1, 2026-08-21.)_

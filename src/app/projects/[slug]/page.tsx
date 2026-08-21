@@ -17,6 +17,7 @@ import { SectionHeader } from "@/components/layout/SectionHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { DualModeText } from "@/components/shared/DualModeText";
 import { MentorChat } from "@/features/project-mentor/MentorChat";
+import { ArchitectureViewer } from "@/features/architecture-viewer/ArchitectureViewer";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -89,14 +90,15 @@ export default async function ProjectDetailPage({
           </div>
         </Section>
 
-        {/* Architecture — static layout only (no interactive viewer yet) */}
+        {/* Architecture — diagram rendered by the Architecture Viewer
+            (foundation). Node details move to its detail panel milestone. */}
         {hasArchitecture && (
           <Section
             id="architecture"
             title="Architecture"
             eyebrow="How it fits together"
           >
-            <ArchitectureView project={project} />
+            <ArchitectureViewer project={project} />
           </Section>
         )}
 
@@ -280,80 +282,6 @@ function StatusNote({ status }: { status: Project["status"] }) {
     );
   }
   return null;
-}
-
-// ─── Architecture (static) ───
-
-function ArchitectureView({ project }: { project: Project }) {
-  const { diagram, edges } = project.architecture;
-
-  return (
-    <div className="flex flex-col gap-6">
-      <div className="grid gap-4 sm:grid-cols-2">
-        {diagram.map((node) => (
-          <Card key={node.id} className="gap-3 p-5">
-            <div className="flex items-center gap-2">
-              <span
-                className="size-2 rounded-full bg-foreground/40"
-                aria-hidden
-              />
-              <h3 className="font-heading text-base font-semibold text-foreground">
-                {node.label}
-              </h3>
-            </div>
-            <dl className="flex flex-col gap-2 text-sm">
-              <NodeDetail label="Purpose" value={node.details.purpose} />
-              <NodeDetail label="Why chosen" value={node.details.whyChosen} />
-            </dl>
-          </Card>
-        ))}
-      </div>
-
-      {edges.length > 0 && (
-        <div>
-          <p className="mb-2 font-mono text-xs tracking-widest text-muted-foreground uppercase">
-            Connections
-          </p>
-          <ul className="flex flex-col gap-2">
-            {edges.map((edge) => (
-              <li
-                key={`${edge.from}-${edge.to}-${edge.label}`}
-                className="flex flex-wrap items-center gap-2 text-sm"
-              >
-                <span className="font-medium text-foreground">
-                  {nodeLabel(project, edge.from)}
-                </span>
-                <ArrowRight
-                  className="size-4 text-muted-foreground"
-                  aria-hidden
-                />
-                <span className="font-medium text-foreground">
-                  {nodeLabel(project, edge.to)}
-                </span>
-                <span className="text-muted-foreground">— {edge.label}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function NodeDetail({ label, value }: { label: string; value: string }) {
-  if (!value) return null;
-  return (
-    <div>
-      <dt className="font-mono text-[11px] tracking-widest text-muted-foreground uppercase">
-        {label}
-      </dt>
-      <dd className="mt-0.5 text-muted-foreground">{value}</dd>
-    </div>
-  );
-}
-
-function nodeLabel(project: Project, id: string): string {
-  return project.architecture.diagram.find((n) => n.id === id)?.label ?? id;
 }
 
 // ─── Timeline ───

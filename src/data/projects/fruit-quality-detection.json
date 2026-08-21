@@ -41,7 +41,7 @@
     "fallback": "I don't have a specific answer for that yet — the knowledge base for this project is still being built."
   },
   "recruiterSummary": {
-    "impact": "TODO: add measurable impact once available",
+    "impact": "Automates visual fruit-quality classification from images using a CNN",
     "outcome": "CNN-based fruit quality classification",
     "skills": ["Python", "TensorFlow", "OpenCV"]
   }

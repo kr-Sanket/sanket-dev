@@ -15,17 +15,21 @@ export const siteConfig = {
 
   social: {
     github: "https://github.com/kr-Sanket",
-    linkedin: "https://linkedin.com/in/sanketkumar",
-    email: "sanket@example.com",
+    linkedin: "https://www.linkedin.com/in/sanket-kumar-515bb228a/",
+    email: "kumarsanket.jsr82@gmail.com",
     resume: "/resume.pdf",
   },
 
   githubUsername: "kr-Sanket",
 
-  // Profile status shown in the Hero status panel. Owner-editable.
+  // Profile status shown in the Hero status panel and Recruiter View.
+  // Owner-editable. `graduation` is a display string; `targetRoles` lists the
+  // roles actively sought (rendered joined or as a list by each surface).
   status: {
-    availability: "Open to opportunities",
+    availability: "Open to full-time opportunities",
     location: "India",
+    graduation: "May 2027",
+    targetRoles: ["Software Engineer", "Backend Engineer", "DevOps Engineer"],
   },
 
   // Competitive-programming usernames — owner-editable and the single source of
@@ -41,7 +45,7 @@ export const siteConfig = {
     cgpa: { value: 8.69, label: "CGPA", icon: "graduation-cap" } as DashboardMetric,
     projects: { value: 3, label: "Projects", icon: "folder-kanban" } as DashboardMetric,
     repositories: { value: 15, label: "Repositories", icon: "git-branch" } as DashboardMetric,
-    certifications: { value: 1, label: "Certifications", icon: "award" } as DashboardMetric,
+    certifications: { value: 3, label: "Certifications", icon: "award" } as DashboardMetric,
   },
 
   projectStatuses: {

@@ -16,8 +16,8 @@ import { cn } from "@/lib/utils";
  * time (SSG) so we never render a broken image for a not-yet-added asset — the
  * same guard used by the project-detail gallery.
  */
-function imageExists(src: string): boolean {
-  return Boolean(src) && existsSync(path.join(process.cwd(), "public", src));
+function imageExists(src: string | undefined): boolean {
+  return Boolean(src) && existsSync(path.join(process.cwd(), "public", src!));
 }
 
 /**
@@ -49,13 +49,17 @@ export function Certifications() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {certifications.map((cert) => {
             const hasImage = imageExists(cert.image);
+            const hasLogo = imageExists(cert.logo);
 
             return (
               <Card
                 key={`${cert.title}-${cert.issuer}`}
                 className="h-full gap-0 overflow-hidden p-0 transition-colors hover:ring-foreground/20"
               >
-                {/* Visual: real image when present, tasteful placeholder otherwise */}
+                {/* Visual, in preference order: certificate image → issuer
+                    logo (centered on a light plate — brand marks like IBM's
+                    are pure black and need a light ground in dark mode) →
+                    generic icon fallback. */}
                 {hasImage ? (
                   <div className="relative aspect-video">
                     <Image
@@ -65,6 +69,18 @@ export function Certifications() {
                       sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                       className="object-cover"
                     />
+                  </div>
+                ) : hasLogo ? (
+                  <div className="flex aspect-video items-center justify-center border-b border-border/60 bg-white px-10">
+                    <div className="relative h-20 w-full">
+                      <Image
+                        src={cert.logo!}
+                        alt={cert.issuer}
+                        fill
+                        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                        className="object-contain"
+                      />
+                    </div>
                   </div>
                 ) : (
                   <div className="flex aspect-video items-center justify-center border-b border-border/60 bg-muted/50">

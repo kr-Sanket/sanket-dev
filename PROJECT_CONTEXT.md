@@ -93,11 +93,18 @@ Most content fields are objects `{ recruiter: string, developer: string }`. `Vie
 ## Owner-specific facts (from `site.config.ts`)
 
 - GitHub username: **`kr-Sanket`** (answers the plan's open question)
-- CGPA **8.69**, Projects **3**, Repositories **15**, Certifications **1**
-- Email is still placeholder (`sanket@example.com`); resume at `/resume.pdf` (not yet added)
-- The 3 planned projects: `devops-api`, `fruit-quality-detection`, `adaptive-cyber-defense`
+- CGPA **8.69**, Projects **3**, Repositories **15**, Certifications **3**
+- Email: `kumarsanket.jsr82@gmail.com` · LinkedIn: `linkedin.com/in/sanket-kumar-515bb228a` · resume at `/resume.pdf` (**real asset, present**) — all landed Sprint 1, 2026-08-21
+- Graduation **May 2027**; seeking Software/Backend/DevOps Engineer roles (full-time) — in `siteConfig.status`
+- The 3 projects: `devops-api`, `fruit-quality-detection`, `adaptive-cyber-defense`
 
-## Current state (updated 2026-07-11)
+## Current state (historical snapshot — 2026-07-11)
+
+> ⚠️ **Superseded.** For current status read `CLAUDE_START.md` §2 + `LAUNCH_BOARD.md`.
+> Since this snapshot: homepage completed, project pages, GitHub Hub + Coding Profiles,
+> Recruiter View, Project Mentor, the full Architecture Viewer (6.1–6.3), Sprint 1
+> launch blockers, real certifications + logos, and Sprint 2 SEO (robots/sitemap/404/
+> OG images/JSON-LD) all shipped. The snapshot below is preserved as history.
 
 **Phase 1 (Foundation) complete; Phase 2 (homepage sections) in progress.** What's working now:
 

@@ -19,6 +19,8 @@ export interface Certification {
   date: string;
   image: string;
   url: string;
+  /** Optional issuer logo (`public/`-relative path); cards fall back to the generic icon when absent. */
+  logo?: string;
 }
 
 export interface CertificationsData {

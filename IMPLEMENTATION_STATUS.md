@@ -1,13 +1,15 @@
 # Implementation Status
 
 > Snapshot comparing the current repository against **Architecture & Implementation Plan v2.0**.
-> Generated: 2026-06-29. Updated: 2026-07-11 (Documentation Synchronization — see §14). Branch: `main`.
+> Generated: 2026-06-29. Updated: 2026-07-11 (§14) and **2026-08-21 (Pre-Relaunch Documentation Sync — see §42)**. Branch: `main`.
 
-## TL;DR
+## TL;DR (current as of 2026-08-21)
 
-**Phase 1 (Foundation) is complete** and **Phase 2 (homepage sections) is in progress** — the **Hero** (refined), the **Engineering Dashboard**, and the **Featured Projects** section are built and live on `/`. The repo is green on `npm run lint` and `npm run build`, with no Base UI console warnings. `layout.tsx` mounts the real font stack (**Inter + JetBrains Mono**), `ThemeProvider`, and `ViewModeProvider`, wrapping a `Navbar` + `<main>` + `Footer` shell; the `ThemeToggle` and `ViewModeToggle` are rendered in the `Navbar`, so **theme switching and Recruiter/Developer view mode both work end-to-end**. Reusable primitives exist (`Container`, `SectionHeader`, `MetricCard`, `ProjectCard`, `StatusBadge`). Data + content access layers are complete. What remains: the other homepage sections, project detail pages, feature modules, and the recruiter route.
+**The platform is feature-complete and in launch preparation** — see `LAUNCH_BOARD.md` for the item-level board. All build phases shipped: full homepage (9 sections), SSG project pages, GitHub Hub + Coding Profiles (ISR), Recruiter View (`noindex`), Project Mentor (client-side hybrid search), and the **Architecture Viewer** (interactive diagram + selection + detail panel, §§27–30). Launch prep so far: P1–P4 product/engineering reviews; **Sprint 1 blockers closed** (real email/resume/LinkedIn, graduation + target roles, research-project impact statements, timeline refreshed to Aug 2026); **real certifications** (3, with credential URLs and issuer logos); **Sprint 2 SEO/production mostly done** (`robots.ts`, `sitemap.ts`, custom 404, build-generated OG/Twitter images, site-wide JSON-LD, `createMetadata` merge-bug fix). Repo green (`lint` + `build`, 12 routes). Remaining before launch: favicons/manifest, analytics decision, domain confirmation, `GITHUB_TOKEN`, image assets, owner-knowledge content — then Sprint 3 polish / Sprint 4 cleanup / Sprint 5 deploy.
 
-**Overall completion: ~52%** (Phase 1 **100%**; **Phase 2 in progress — Hero + Dashboard + Featured Projects done**; data + content layers 100%; build/lint green; no Base UI warnings).
+> The paragraph below and the §1 Phase Matrix are the original 2026-06/07 snapshot, preserved as history — do not trust them for current status.
+
+**[Historical]** Phase 1 (Foundation) complete; Phase 2 (homepage sections) in progress — Hero (refined), Engineering Dashboard, and Featured Projects live on `/`. **Overall completion then: ~52%.**
 
 > ✅ **Validation blockers RESOLVED (Milestone 1.6).** The prior build/lint failures — Base UI `<TooltipTrigger asChild>` (ADR-002) and `react-hooks/set-state-in-effect` — have been fixed using correct Base UI (`render` prop) and React (`useSyncExternalStore`) patterns. No lint rules were disabled. See "Milestone 1.6" section below.
 
@@ -759,6 +761,381 @@ Fuse.js fuzzy (0.4) + hand-rolled TF-IDF cosine (0.6) ✅ · threshold 0.25 ✅ 
 ### Notes / remaining work
 - fruit-quality-detection & adaptive-cyber-defense knowledge bases are empty (owner content, Milestone 1.5 placeholders) — the chat upgrades automatically when entries are authored, no code change.
 - Next: **Architecture Viewer** — the last Phase 4 unique feature (see `ROADMAP.md`).
+
+## 27. Milestone 6.1 — Architecture Viewer Foundation (2026-08-21)
+
+**Scope:** the viewer foundation only — diagram canvas, nodes, and SVG connection lines from the existing `project.architecture` data, replacing the static architecture rendering on `/projects/[slug]`. **No** detail panel, node details, click behavior, zoom/pan/drag, animation, or mobile drawer. **Status: ✅ complete — repo green.**
+
+### Files created (5, under `src/features/architecture-viewer/`)
+- `ArchitectureViewer.tsx` — entry point; takes a `Project`, returns `null` for empty diagrams, derives per-node category labels from the project's own `techStack` (label match — the `ArchitectureNode` schema has no category field; nothing invented), and renders the canvas. Content-only like `MentorChat` — the page's `Section` wrapper supplies `Container`/`SectionHeader`.
+- `ArchitectureCanvas.tsx` — responsive CSS grid sized from the authored node `x`/`y` coordinates (`cols = maxX+1`, `rows = maxY+1`); resolves edges to cell-center endpoints in percentage space; renders the SVG underlay, node cells, midpoint edge labels, and an `sr-only` connections list. Bounded rounded container (`bg-muted/20`), no scrolling. Edges referencing unknown node ids are skipped, not crashed on.
+- `ArchitectureNode.tsx` — focusable `<button>` node card (card theme tokens: `bg-card`, `ring-foreground/10`, `rounded-xl`, shared ring-lift hover; a `<button>` can't be the div-based `Card`): muted icon box (icon-name → lucide map with `Boxes` fallback; lucide has no brand glyphs), label, optional outline mono category `Badge`, `data-selected` styling placeholder. No click handler yet by design.
+- `ConnectionLines.tsx` — `aria-hidden` SVG overlay (`viewBox 0 0 100 100`, `preserveAspectRatio="none"`) drawing one `<line>` per edge with `vectorEffect="non-scaling-stroke"`; no animation.
+- `types.ts` — `DiagramGrid`, `PositionedEdge` (edge + percentage-space endpoints).
+
+### Files modified (3)
+- `src/app/projects/[slug]/page.tsx` — the Architecture section now mounts `<ArchitectureViewer project={project} />`; the static `ArchitectureView`/`NodeDetail`/`nodeLabel` helpers were removed (the `hasArchitecture` guard is unchanged). **Note:** node `details` (purpose/whyChosen) are no longer rendered — they return with the detail-panel milestone.
+- `ROADMAP.md`, `IMPLEMENTATION_STATUS.md` — this update.
+
+### Data audit (schema used exactly as-is)
+- `ArchitectureNode` = `{ id, label, icon, x, y, details{purpose, whyChosen, configNotes, lessonsLearned} }`; `ArchitectureEdge` = `{ from, to, label }`. No schema changes.
+- **devops-api:** 2 nodes (`github` @ 0,0 · `jenkins` @ 0,1), 1 edge (`Webhook Trigger`) — the plan's remaining nodes (docker, terraform, junit, grafana, prometheus) are still unauthored (Milestone 1.5 placeholder).
+- **fruit-quality-detection / adaptive-cyber-defense:** `diagram`/`edges` empty → no Architecture section renders (unchanged behavior).
+
+### Design decisions
+- **All server components** — no interactivity ships in this milestone, so no client island yet; selection will introduce one later.
+- **Percentage-space alignment:** SVG endpoints and grid cell centers share the same coordinate math inside one wrapper (grid has no `gap`; spacing comes from per-cell padding), so lines track nodes at any width with zero JS measurement.
+- **No fabrication:** category badge only where a techStack label matches (Jenkins → `ci-cd`; GitHub has none → badge hidden); edge label rendered only when non-empty.
+- **Accessibility:** diagram is `role="group"` with a project-specific `aria-label`; nodes are real keyboard-focusable buttons with visible `focus-visible` rings (repo idiom); lines/edge labels are decorative (`aria-hidden`) with an `sr-only` "X connects to Y: label" list as the text alternative.
+
+### Validation
+- **`npm run lint`** → exit 0, clean ✅
+- **`npm run build`** → exit 0; 8 routes, all 3 project pages prerendered ✅
+- **Prerendered-HTML checks (devops-api):** architecture section + `aria-label` group present; exactly 2 node buttons (GitHub, Jenkins); 1 SVG line with `non-scaling-stroke`; "Webhook Trigger" midpoint label; `ci-cd` badge on Jenkins only; sr-only connections list; grid placement (`repeat(1, …)`, row 2). Other two projects: no architecture section. ✅
+
+### Notes / remaining work
+- Node `details` are currently unreachable in the UI — the **detail panel + selection** milestone should land next.
+- Full devops-api diagram data (5 more nodes + edges) and the two research-project diagrams are owner content.
+
+## 28. Milestone 6.1.5 — Architecture Data Authoring (2026-08-21)
+
+**Scope:** data only — expand `devops-api.json`'s architecture diagram so it becomes the Architecture Viewer's reference implementation. **No** UI, detail panel, interactions, or animations. Schema used exactly as-is. **Status: ✅ complete — repo green.**
+
+### Files modified (3)
+- `src/data/projects/devops-api.json` — architecture block only (see below).
+- `ROADMAP.md`, `IMPLEMENTATION_STATUS.md` — this update.
+
+### What changed (2 nodes / 1 edge → 7 nodes / 5 edges, 3×3 grid)
+- **Nodes added:** `junit` (JUnit 5), `docker`, `terraform`, `prometheus`, `grafana` — exactly the five nodes Milestone 1.5 recorded as spec-defined but unauthored. **Every detail sentence is recomposed from text already in this file** (overview.developer, the Jenkins-reliability challenge, the IaC lesson, and the 5 mentor knowledge-base answers) — no technology or fact was invented.
+- **Nodes improved:** `jenkins` gained the documented Docker-in-Docker executor rationale (KB), Slack notifications + try-catch-finally + 12→6min parallel tests (challenge), and the reliability/idempotency lesson (KB). `github` unchanged.
+- **Edges added:** `jenkins→junit` ("Test"), `jenkins→docker` ("Docker Build"), `jenkins→terraform` ("Terraform Apply") — the documented Jenkinsfile stage names — and `prometheus→grafana` ("Metrics", per the KB monitoring answer). **The monitoring pair is deliberately not connected to the pipeline**: no existing text documents that link (see questionnaire).
+- **Positions reorganized** for a left-to-right/top-down flow: row 0 GitHub→Jenkins, row 1 the three pipeline fan-out stages, row 2 the monitoring pair.
+- **Honest gaps kept empty (`""`), not filled:** `whyChosen` + `lessonsLearned` for JUnit 5, Prometheus, and Grafana — no source text explains those choices. The future detail panel must hide empty fields (the old static view already did).
+- **Icons:** mapped names where semantically honest (`container`, `cloud`, `database`, `shield`); `github`/`gauge` fall back to the viewer's generic icon until its icon map is extended (a later UI change, out of scope here).
+
+### Owner questionnaire (blocking full detail-panel content)
+1. **JUnit 5** — why JUnit 5 (vs. TestNG/Spock)? Any testing-specific lessons? Coverage/test-count worth citing? *(whyChosen/lessonsLearned empty.)*
+2. **Prometheus** — why Prometheus (vs. CloudWatch etc.)? Where does it run (EC2 via Terraform? separate host)? Lessons? *(whyChosen/lessonsLearned empty.)*
+3. **Grafana** — why Grafana? Where hosted? Where do alerts go (Slack webhook like the pipeline?)? Lessons? *(whyChosen/lessonsLearned empty.)*
+4. **Deployment path** — where are Docker images stored (Docker Hub? ECR?) and where do containers run (the Terraform-provisioned EC2?)? *(Needed for docker/terraform → runtime edges.)*
+5. **Topology** — should a deployed-app/AWS-runtime node exist so the Health Check stage target and Prometheus's scrape target are visible? Terraform → AWS edge? *(Monitoring is currently a disconnected island — reflects missing data, not reality.)*
+6. **Other projects** — fruit-quality-detection & adaptive-cyber-defense have zero architecture data; full authoring needed from the owner.
+
+### Validation
+- **JSON checks:** parses; all 7 nodes conform to the `ArchitectureNode` shape; all 5 edges reference valid node ids; no duplicate grid cells; grid 3×3. ✅
+- **`npm run lint`** → exit 0, clean ✅
+- **`npm run build`** → exit 0; 8 routes prerendered ✅
+- **Prerendered-HTML checks (devops-api):** 7 node buttons (all labels), 5 SVG lines, all 5 edge labels, 3-column grid, techStack category badges (Jenkins `ci-cd`, Docker `devops`, Terraform `infrastructure`), 5 sr-only connection entries. ✅
+
+### Notes
+- Three same-row edge labels ("Test" / "Docker Build" / "Terraform Apply") may crowd on very narrow viewports — a viewer-side consideration for a later milestone, not a data problem.
+- Next: **6.2 — detail panel & selection**, which now has 4 fully-populated reference nodes (GitHub, Jenkins, Docker, Terraform) plus 3 partially-populated ones to exercise its empty-field handling.
+
+## 29. Milestone 6.2 — Architecture Viewer Selection (2026-08-21)
+
+**Scope:** node selection only — no detail panel, node-information UI, drawer, zoom/pan/drag, or animations beyond subtle state transitions. No viewer redesign. **Status: ✅ complete — repo green.**
+
+### Files modified (5)
+- `src/features/architecture-viewer/ArchitectureViewer.tsx` — now `"use client"` (the MentorChat client-island pattern; prop contract unchanged: still receives a `Project`). Owns the selection state: `selectedId: string | null`, `toggleNode` (re-selecting clears), `clearSelection`. State lives here — not in the canvas — so the 6.3 detail panel can render as a canvas sibling from the same state.
+- `src/features/architecture-viewer/ArchitectureCanvas.tsx` — new props `selectedId` / `onToggleNode` / `onClearSelection`. The canvas root clears selection on background click and on Escape (bubbling from the focused node — focus itself never moves). Passes `selected` + `onToggle` to each node.
+- `src/features/architecture-viewer/ArchitectureNode.tsx` — the button is now a real toggle: `onClick` stops propagation (so background-clear doesn't undo it) and toggles; **`aria-pressed`** reflects selection (`aria-selected` is invalid on buttons). Selected styling upgraded from the 6.1 placeholder: `ring-2 ring-foreground/60` + `shadow-md` + `-translate-y-0.5` lift, with `transition motion-reduce:transition-none`. Hover stays the subtle shared ring-lift.
+- `ROADMAP.md`, `IMPLEMENTATION_STATUS.md` — this update.
+
+### Interaction model
+- **Click / Enter / Space** on a node → toggle selection (Enter/Space work through the native `<button>` click; no custom key handling needed on nodes).
+- **Click canvas background** → clear.
+- **Escape** (anywhere inside the canvas, e.g. on a focused node) → clear; focus remains where it was.
+- **Tab** moves focus between nodes natively; exactly one node can be selected at a time; SSR renders no selection (`aria-pressed="false"` on all nodes, no `data-selected` attribute).
+
+### Architecture / design decisions
+- **Client boundary = the viewer** (per PROJECT_CONTEXT's client-island list, which always included the architecture viewer). Canvas/node components need no directive — they join the client graph through the viewer. No new components, no duplicated logic; `types.ts` and `ConnectionLines` untouched.
+- **`aria-pressed` over `aria-selected`:** the nodes are toggle buttons; `aria-selected` is only valid on roles like `option`/`tab`, which would misrepresent the widget.
+- **Reduced motion:** the only "animation" is the CSS transition on the selection lift/ring, disabled under `motion-reduce`.
+
+### Validation
+- **`npm run lint`** → exit 0, clean ✅
+- **`npm run build`** → exit 0; 8 routes prerendered ✅
+- **Prerendered-HTML checks (devops-api):** 7 node buttons all `aria-pressed="false"`, zero `data-selected` attributes (no phantom selection), 7 labels + 5 SVG lines intact. **Client bundle** contains the selection wiring (`stopPropagation`, `Escape`, `data-selected`). ✅
+
+### Notes / remaining work
+- Selection currently has no visible consumer beyond the node styling — by design; **6.3 (detail panel)** consumes `selectedId` next.
+- Owner questionnaire from §28 still open (empty `whyChosen`/`lessonsLearned` on JUnit 5, Prometheus, Grafana; deployment-path/topology questions).
+
+## 30. Milestone 6.3 — Architecture Viewer Detail Panel (2026-08-21)
+
+**Scope:** the detail panel only — consumes the existing 6.2 selection state and the existing `node.details` schema. No viewer redesign, no zoom/pan/drag, no schema change. **Status: ✅ complete — repo green. 🏁 Architecture Viewer planned scope (diagram + selection + detail panel) complete — Phase 4 unique features done.**
+
+### Files created (1)
+- `src/features/architecture-viewer/NodeDetailPanel.tsx` — an `<aside aria-label="Component details" aria-live="polite">` that **persists across selection changes** (content swaps inside it), so screen readers hear updates politely and focus never moves. Two states:
+  - **Selected node:** `Card` with the node label (`<h3>`, continuing the section's `h2` hierarchy), the techStack-derived category `Badge` (outline, mono, uppercase — same as the node card), and a `<dl>` of Purpose / Why Chosen / Configuration Notes / Lessons Learned using the established mono-uppercase `dt` + muted `dd` styling (the same language the pre-6.1 static view used).
+  - **Empty selection:** dashed-border placeholder (the gallery-placeholder pattern) — "Select a component to inspect its role in the architecture." No animation.
+
+### Files modified (3)
+- `src/features/architecture-viewer/ArchitectureViewer.tsx` — resolves `selectedNode` from the existing `selectedId` and renders canvas + panel in a responsive layout: `lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)]` (diagram | panel) with `items-start`; stacked `flex-col` below `lg`. `minmax(0, …)` keeps both columns overflow-safe.
+- `ROADMAP.md`, `IMPLEMENTATION_STATUS.md` — this update.
+
+### Design decisions
+- **Empty-field discipline:** fields are filtered by the same guard convention as `ProjectCard`/`DualModeText` — empty/whitespace or `TODO`-prefixed values hide the entire field (no "N/A"/"Coming soon" ever). JUnit 5 / Prometheus / Grafana (empty `whyChosen`/`lessonsLearned` pending §28 owner answers) therefore show only their populated fields; a hypothetical all-empty node would show just title + badge.
+- **Panel sits outside the canvas**, so clicking it does not trigger the canvas's background-click-to-clear — reading details can't accidentally dismiss them. Escape still clears from within the canvas.
+- **No hardcoded content:** everything rendered comes from `node.details`, the node label, and the derived category; field headings are UI text, not data.
+- **Reuse:** `Card`, `Badge`, theme tokens, gallery-placeholder pattern, existing `dt`/`dd` styling. `buttonVariants` was not needed — the panel contains no actions in this milestone.
+
+### Validation
+- **`npm run lint`** → exit 0, clean ✅
+- **`npm run build`** → exit 0; 8 routes prerendered ✅
+- **Prerendered-HTML checks (devops-api):** live-region aside present; SSR shows the empty-state placeholder text; no detail content leaked while nothing is selected; layout grid class present; canvas intact (7 buttons, 5 lines). **Client bundle** contains the field labels + placeholder copy (panel renders client-side on selection). ✅
+
+### Notes / remaining work
+- The Architecture Viewer is feature-complete for its planned scope. Remaining depth is **data**: the §28 owner questionnaire (pure JSON edits, no code) and the two research projects' empty diagrams.
+- Next up per the roadmap: move Coding Profiles directly after GitHub Hub in the homepage flow, then Phase 6 polish (`not-found`, `sitemap`, `robots`, OG images, real assets, a11y/perf pass).
+
+## 31. Sprint 1.1 — Graduation Date & Target Roles (2026-08-21)
+
+**Scope:** surface owner-provided graduation date and target roles on the Homepage Hero and Recruiter View, from one shared data source. Launch-blocker items from `LAUNCH_BOARD.md` Sprint 1 (P2 review: graduation + role intent are the top facts recruiters need). **Status: ✅ complete — repo green. Owner data confirmed directly (not assumed).**
+
+### Files modified (6)
+- `src/data/site.config.ts` — `status` block extended: `graduation: "May 2027"`, `targetRoles: ["Software Engineer", "Backend Engineer", "DevOps Engineer"]`; `availability` sharpened to `"Open to full-time opportunities"` (captures the owner's full-time intent). Single source of truth — no value duplicated anywhere.
+- `src/sections/Hero.tsx` — Engineering Status panel: "Graduation" `StatusBlock` added to the existing 2-col grid (Availability · Location · Graduation) plus a full-width "Seeking" block with roles joined `" · "` (the recruiter-page skills idiom). Rendered via the existing `StatusBlock` — no new UI primitives.
+- `src/lib/recruiter.ts` — `RecruiterHero` gains `graduation: string` + `targetRoles: string[]`; `buildHero()` passes them through from `siteConfig.status` (spread to unfreeze the `as const` tuple).
+- `src/app/recruiter/page.tsx` — hero status `<dl>` extended: Availability · Location · Graduation · Seeking (roles joined `" · "`; block hidden if the array is ever empty).
+- `LAUNCH_BOARD.md` — Sprint 1 items ticked; `ROADMAP.md` — completed entry.
+
+### Design decisions
+- **Extend `siteConfig.status`** — it was already the owner-editable profile-status block consumed by exactly these two surfaces; adding fields there keeps both surfaces reading one source (zero duplication, per the milestone constraint).
+- **Display-ready strings, structured roles:** `graduation` is a display string (matching `availability`/`location`); `targetRoles` is an array so each surface chooses its rendering (both currently join with `·`).
+- **Full-time intent lives in `availability`** rather than a separate employment-type field — one line, no schema ceremony; roles stay clean in `targetRoles`.
+- **No hardcoded strings:** "Graduation"/"Seeking" are UI labels (like "Availability"); all values come from config.
+
+### Validation
+- **`npm run lint`** → exit 0, clean ✅
+- **`npm run build`** → exit 0; 8 routes prerendered ✅
+- **Prerendered-HTML checks (both `/` and `/recruiter`):** "Graduation" + "May 2027" present; "Seeking" + "Software Engineer · Backend Engineer · DevOps Engineer" present; "Open to full-time opportunities" replaces the old availability everywhere. Recruiter `<dl>` label order: Availability · Location · Graduation · Seeking. ✅
+
+## 32. Sprint 1.2 — Contact Funnel (2026-08-21)
+
+**Scope:** replace the placeholder contact email with the owner's real address across the shared data; no component/styling/architecture changes. **Status: ✅ complete — repo green. Owner provided the email directly; resume/LinkedIn remain owner-pending.**
+
+### Files modified (4)
+- `src/data/site.config.ts` — `social.email` → `kumarsanket.jsr82@gmail.com` (feeds the recruiter "Get in touch" mailto CTA).
+- `src/data/contact.json` — Email link `url` (`mailto:`) + `label` updated to match (feeds the homepage Contact section, Footer, and recruiter "Get in touch" section).
+- `LAUNCH_BOARD.md` — email ticked; resume/LinkedIn status annotated; contact-data duplication added to Sprint 4.
+- `ROADMAP.md` — completed entry.
+
+### Findings / decisions
+- **Two data sources, not one:** email/GitHub/LinkedIn/resume live in both `siteConfig.social` and `contact.json` (duplication inherited from Milestone 1.5). Both were updated in lockstep this sprint; **consolidation deferred to Sprint 4** (architecture change out of this data-only scope).
+- **Partial owner answers handled safely:** GitHub URL unchanged (owner was asked to correct only if different; it's also live-API-verified since 5.1); LinkedIn kept but still flagged unverified; resume not ready → all existing graceful handling retained (`social.resume` conditional CTAs unchanged).
+- **Zero hardcoding:** components untouched — every consumer picked up the new value automatically via the content layer.
+
+### Validation
+- **`npm run lint`** → exit 0, clean ✅
+- **`npm run build`** → exit 0; 8 routes prerendered ✅
+- **Prerendered-HTML sweep (all 8 pages):** `sanket@example.com` appears nowhere; new address present as both `mailto:` href and visible label on `/` (Contact section + Footer) and `/recruiter` (hero CTA + Get in touch). ✅
+
+### Remaining (owner)
+- ~~`public/resume.pdf`~~ ✅ **Resolved same day:** owner placed the file (verified real PDF, 139 KB); all Resume CTAs activated automatically with zero code changes.
+- GitHub URL: owner confirmed no change (`github.com/kr-Sanket`).
+- ~~LinkedIn URL~~ ✅ **Resolved same day:** owner provided `https://www.linkedin.com/in/sanket-kumar-515bb228a/` — applied to both `siteConfig.social.linkedin` and the `contact.json` link (URL + display label). Old URL verified absent from all prerendered pages; new URL present site-wide (footer on every page, homepage Contact, recruiter hero + Get in touch). **Sprint 1.2 contact funnel is now fully closed: email ✅ resume ✅ GitHub ✅ LinkedIn ✅.**
+
+## 33. Sprint 1.3 — Research Project Impact Statements (2026-08-21)
+
+**Scope:** replace the two `recruiterSummary.impact` TODO placeholders with honest recruiter-facing value statements. Data-only; no schema change, no components touched. **Status: ✅ complete — repo green.**
+
+### Files modified (4)
+- `src/data/projects/fruit-quality-detection.json` — `impact`: "Automates visual fruit-quality classification from images using a CNN".
+- `src/data/projects/adaptive-cyber-defense.json` — `impact`: "Investigates how machine learning can help network defenses adapt to evolving threats".
+- `LAUNCH_BOARD.md` (impact ticked; developer-overview follow-up split out), `ROADMAP.md`.
+
+### Honesty audit (full inventory performed first)
+Sources checked: both projects' `recruiterSummary`/`overview`/`challenges`/`lessons`/`futureImprovements`/metadata, plus `mission.json` and `timeline.json`. Available facts: FQD = CNN image classification of fruit quality (Python/TensorFlow/OpenCV, in progress since 2025-05); ACD = research into ML-adaptive network defense (since 2025-06). **No datasets, models, results, or deployments exist anywhere** — so both statements use the value register (Automates…/Investigates…) describing what the project does/explores. Zero metrics, zero outcomes, zero fabrication; every word traceable to `overview`, `techStack`, or `mission.json`. Owner input was not needed for this register (it *is* needed for developer overviews — left open on the launch board).
+
+### Behavior change
+`ProjectCard` hides TODO-prefixed impact, so both cards previously showed no impact line; they now render the statements on the **homepage** Featured Projects and the **Recruiter View** (verified in prerendered HTML). Project detail pages don't render `recruiterSummary` (P1 finding, unchanged); the remaining TODO strings (developer overviews) appear only in the RSC payload, never as visible text (verified).
+
+### Validation
+- **`npm run lint`** → exit 0 ✅ · **`npm run build`** → exit 0; 8 routes ✅
+- **Prerendered checks:** both impact lines present on `/` and `/recruiter`; visible-text TODO sweep across all 8 pages clean. ✅
+
+## 34. Sprint 1.4 — Timeline Refresh (2026-08-21)
+
+**Scope:** refresh `src/data/timeline.json` with recent milestones so the journey no longer appears to stop in June 2025 (P2/P3 review finding). Data-only; no schema or component changes. **Status: ✅ complete — repo green. Nothing invented — every entry is anchored to git history and this document.**
+
+### Files modified (3)
+- `src/data/timeline.json` — 4 events appended (6 → 10 total).
+- `LAUNCH_BOARD.md` (site-wide timeline ticked; per-project FQD/ACD milestones split out as still owner-pending), `ROADMAP.md`.
+
+### Events added (source-anchored)
+| Date | Type | Title | Source |
+|---|---|---|---|
+| 2026-06 | project-start | Portfolio Platform — sanket.dev | Initial commit 2026-06-02; foundation docs 2026-06-29 |
+| 2026-07 | milestone | Portfolio Homepage & Live Integrations | Commits + §§10–23 (homepage complete, SSG project pages, GitHub Hub ISR — 2026-07-11/12) |
+| 2026-07 | milestone | Recruiter View & Project Mentor Shipped | Commits 2026-07-29; §§25–26 |
+| 2026-08 | milestone | Architecture Viewer Shipped | §§27–30 (6.1–6.3, 2026-08-21) |
+
+### Design decisions
+- **Recruiter View + Mentor combined into one event** — both shipped in the same 2026-07 commits; keeps the portfolio-build entries (4) from outnumbering the life events (6).
+- **Portfolio start typed `project-start`** so the recruiter Highlights filter (milestone/project-end/achievement) keeps it out — highlights stay outcome-only, as designed in 5.3.
+- **`relatedProject: null`** for all four — the portfolio isn't a project JSON, so no link/title resolution is attempted.
+- Mapped icons only (`rocket`, `check-circle`); factual descriptions in the data's existing voice, no marketing language.
+
+### Validation
+- **`npm run lint`** → exit 0 ✅ · **`npm run build`** → exit 0; 8 routes ✅
+- **Prerendered checks:** homepage timeline renders all 10 events chronologically (2024-08 → 2026-08, all four new titles present); recruiter Highlights now 6 entries (Aug 2024 · Apr 2025 · Jun 2025 · Jul 2026 ×2 · Aug 2026) with the `project-start` portfolio entry correctly excluded. ✅
+
+### Remaining (owner)
+- FQD/ACD per-project `timeline.milestones` still show only their 2025 "started" entries — recent progress milestones require owner knowledge.
+
+## 35. Launch Task 2.1 — robots.ts (2026-08-21)
+
+**Scope:** `robots.txt` metadata route only (first Phase 6 / Sprint 2 production item). **Status: ✅ complete — repo green.**
+
+### Files created (1)
+- `src/app/robots.ts` — Next 16 `MetadataRoute.Robots` convention (verified in `node_modules/next/dist/docs/.../metadata/robots.md`): `userAgent: "*"`, `allow: "/"`, `sitemap: ${siteConfig.url}/sitemap.xml`. URL comes from `siteConfig.url` (the same canonical source `metadataBase` uses) — nothing hardcoded.
+
+### Files modified (2)
+- `LAUNCH_BOARD.md` (ticked), `ROADMAP.md`.
+
+### Design decisions
+- **`/recruiter` is NOT disallowed in robots** (per ADR-011 and the task requirement): its exclusion mechanism is the page-level `noindex, nofollow` meta, and a robots disallow would *prevent* crawlers from ever seeing that directive. robots.ts carries no per-page rules.
+- Static metadata route (no request-time APIs) → cached/prerendered at build.
+- The referenced `/sitemap.xml` ships in Task 2.2 — the URL is declared now per the task requirement.
+
+### Validation
+- **`npm run lint`** → exit 0 ✅ · **`npm run build`** → exit 0; **9 routes** incl. `○ /robots.txt` ✅
+- **Generated output verified:** `User-Agent: *` / `Allow: /` / `Sitemap: https://sanket.dev/sitemap.xml`. ✅
+- **No metadata behavior changed:** `/recruiter` still emits `noindex, nofollow`; public pages still emit their standard robots meta. ✅
+
+## 36. Launch Task 2.2 — sitemap.ts (2026-08-21)
+
+**Scope:** the sitemap metadata route only. **Status: ✅ complete — repo green.**
+
+### Files created (1)
+- `src/app/sitemap.ts` — Next 16 `MetadataRoute.Sitemap` convention (verified in installed docs), async, build-time static. Entries: `siteConfig.url` (homepage) + every non-`planned` project page built from `getProjectSlugs()` + `ROUTES.project()` — the identical source/helper pair `generateStaticParams` and the app's links use, so slug discovery isn't duplicated and the sitemap cannot drift from the actually-built routes.
+
+### Files modified (2)
+- `LAUNCH_BOARD.md` (ticked; new Sprint 4 item below), `ROADMAP.md`.
+
+### Design decisions
+- **Exclusions by construction:** `/recruiter` (noindex, ADR-011) and `/_not-found` are simply never generated from the sources used; no denylist to maintain.
+- **`lastModified` omitted deliberately** (requirement 8 fallback): no trustworthy per-page source exists — git checkout mtimes are meaningless in CI, project `timeline` dates describe the work rather than the page, and emitting the build date would falsely claim sitewide changes on every deploy. The field is optional per the sitemap protocol; omission is the honest choice.
+- `changeFrequency`/`priority` also omitted — ignored by major crawlers; keeps the route minimal.
+
+### Incidental finding
+- `EXTERNAL_URLS` in `lib/constants.ts` has **zero consumers** and still carries the pre-Sprint-1.2 LinkedIn URL — added to the Sprint 4 cleanup list (stale-data footgun; not touched here, out of scope).
+
+### Validation
+- **`npm run lint`** → exit 0 ✅ · **`npm run build`** → exit 0; **10 routes** incl. `○ /sitemap.xml` ✅
+- **Generated XML verified:** exactly 4 `<loc>` entries — homepage + devops-api + fruit-quality-detection + adaptive-cyber-defense; no recruiter, no 404. `robots.txt`'s `Sitemap: https://sanket.dev/sitemap.xml` now resolves to a real route. ✅
+
+## 37. Launch Task 2.3 — Custom not-found.tsx (2026-08-21)
+
+**Scope:** the custom 404 page only. **Status: ✅ complete — repo green.**
+
+### Files created (1)
+- `src/app/not-found.tsx` — root not-found convention (verified in `node_modules/next/dist/docs/.../file-conventions/not-found.md`): handles unmatched routes **and** `notFound()` thrown by the project route's guard (`dynamicParams = false` + defensive check), so unknown project slugs now get the branded page instead of Next's default.
+
+### Design decisions
+- **Design-system reuse only:** `Container`, `buttonVariants` (primary `size lg h-10 px-5` / outline `px-4` — the exact hero CTA idiom), mono uppercase eyebrow ("Error 404"), `tracking-tight text-balance` h1, muted `text-pretty` body. No new components, no animation, no gradients.
+- **Rendered inside the root layout** (not `global-not-found`) — Navbar and Footer stay, so a lost visitor keeps full site navigation.
+- **CTAs:** "Back to Homepage" → `ROUTES.home`; "View Projects" → `/#${SECTION_IDS.projects}` (no `/projects` index route exists — this is the same target the project pages' back-link uses). Plain `next/link` (cross-route hash navigation; `HashLink` is for same-page clicks).
+- **Copy:** professional, engineering-plain ("This route doesn't resolve to anything — the page may have moved, or the URL has a typo."). No jokes, no mascots.
+- **Accessibility:** single `h1` under the layout's structure; real links (keyboard/right-click intact) with the shared focus-visible styles from `buttonVariants`; centered block responsive by construction (`max-w-md`, wrap-friendly button row, `min-h-[60svh]` vertical centering).
+
+### Validation
+- **`npm run lint`** → exit 0 ✅ · **`npm run build`** → exit 0; 10 routes, `/_not-found` prerendered ✅
+- **Prerendered checks:** exactly one `h1` ("Page not found"); eyebrow, explanation, both CTAs with correct hrefs; `<nav>`/`<footer>`/layout shell present. Existing routes unaffected (route table unchanged apart from the already-present `/_not-found`). ✅
+
+## 38. Launch Task 2.4 — Open Graph Images (2026-08-21)
+
+**Scope:** production OG/Twitter card images via the App Router metadata API; metadata updated only where necessary. **Status: ✅ complete — repo green. The P4 "metadata over-promises" mismatch is closed.**
+
+### Files created (2)
+- `src/app/opengraph-image.tsx` — build-time `ImageResponse` (convention verified in installed docs): 1200×630 PNG, exports `alt`/`size`/`contentType`. Every string from `siteConfig` (brand, availability, role, name, tagline, focusAreas, domain). Design mirrors the site: flat `#0a0a0a`, letter-spaced uppercase eyebrow, green status dot (the hero status-panel idiom), 92px name, muted tagline, hairline bottom rule. Hex equivalents of the dark tokens (satori can't resolve CSS variables); default bundled font (no font assets introduced).
+- `src/app/twitter-image.tsx` — re-exports the OG module so an explicit `twitter:image` tag backs the existing `summary_large_image` card (not relying on X's og:image fallback).
+
+### Files modified (3)
+- `src/lib/metadata.ts` — (1) `SHARED_OG_IMAGE` (`/opengraph-image`, 1200×630, alt) added as the default `openGraph.images`/`twitter.images` in `createMetadata`. Necessary because Next's metadata resolution replaces a parent's `openGraph` object wholesale when a child exports its own — the root file-convention injection only reached `/`. (2) **Latent bug fixed:** the final top-level `...overrides` spread was replacing the merged `openGraph` object entirely for any caller passing openGraph overrides — project pages had silently lost `og:site_name` (and would have lost images). Overrides are now destructured; `openGraph`/`twitter` merge key-by-key, the rest spreads at top level.
+- `LAUNCH_BOARD.md` (ticked), `ROADMAP.md`.
+
+### Validation
+- **`npm run lint`** → exit 0 ✅ · **`npm run build`** → exit 0; **12 routes** incl. `○ /opengraph-image` + `○ /twitter-image` ✅
+- **Per-page meta sweep:** every real page (`/`, 3 project pages, `/recruiter`, 404) emits **exactly one** `og:image` and one `twitter:image` (homepage/404 get the hash-busted URL via file-convention priority; metadata-declared pages get the stable `/opengraph-image` URL — same route). `og:site_name` restored on project pages. Recruiter `noindex` unchanged. ✅
+- **Visual check of the generated PNG:** on-brand — dark, typographic, recruiter-readable, no gradients/glass/neon. ✅
+
+## 39. Launch Task 2.5 — JSON-LD Structured Data (2026-08-21)
+
+**Scope:** schema.org JSON-LD from existing shared data only; no libraries, no fabrication. **Status: ✅ complete — repo green.**
+
+### Files modified (4)
+- `src/lib/metadata.ts` — `getStructuredData()` (the schema object) + `getStructuredDataJson()` (serialized with `<` → `<` per the Next JSON-LD guide — defense in depth; the payload is own config). Centralized in the existing SEO module alongside `createMetadata`.
+- `src/app/layout.tsx` — renders the single `<script type="application/ld+json">` in `<body>` (server component — zero client JS).
+- `LAUNCH_BOARD.md` (ticked), `ROADMAP.md`.
+
+### Schema decisions
+- **`@graph` of Person + WebSite** with `@id` cross-referencing (`/#person`, `/#website`; WebSite.publisher → Person) — one block, no duplicate schemas anywhere.
+- **Person fields, all from `siteConfig`:** name, url, jobTitle (`role`), description, `email` (included because it's already intentionally public — Contact/Footer/Recruiter render it), `sameAs` [GitHub, LinkedIn], `knowsAbout` (`focusAreas`). **Omitted:** `image` (no real headshot exists — the OG card is branding, not a person photo), affiliation/alumniOf (VIT exists only inside the role display string; structuring it would be parsing, not reusing).
+- **Considered and deferred:** `ProfilePage` (homepage-only placement would break the centralized single-block design for marginal gain) and per-project `SoftwareSourceCode`/`WebPage` (worth adding when project pages have richer artifacts; today they'd mostly duplicate title/description already in OG tags). Reasoning recorded per the task.
+
+### Validation
+- **`npm run lint`** → exit 0 ✅ · **`npm run build`** → exit 0; 12 routes ✅
+- **Per-page sweep:** exactly **one** JSON-LD block on every real page, parsing as valid JSON with `@graph` types `[Person, WebSite]`. Deep value check: name/jobTitle/email (`kumarsanket.jsr82@gmail.com`)/sameAs (incl. the new LinkedIn URL)/knowsAbout all match shared config; no `image` field; publisher `@id` reference correct. **OG/Twitter metadata unchanged** (still exactly one image tag each). ✅
+
+## 40. Sprint 1.X — Real Certifications (2026-08-21)
+
+**Scope:** replace the placeholder AWS certification with the owner's 3 real certificates, values verbatim. Data-only; schema and UI untouched. **Status: ✅ complete — repo green.**
+
+### Files modified (4)
+- `src/data/certifications.json` — AWS placeholder removed; 3 real certs added newest-first: **Devops, Agile & Design Thinking** (IBM Career Education Program, "July 21, 2026", credential URL), **DevOps Fundamentals** (same issuer, "June 30, 2025", credential URL), **Java Programming** (GeeksforGeeks, `date: ""` — none determinable per the task, placed last, PDF credential URL). All `image` fields `""` (no assets exist; no placeholder images introduced — the section's existing Award panel handles it).
+- `src/data/site.config.ts` — `dashboard.certifications.value` 1 → 3 (**directly derived consistency fix**: the metric renders on the homepage Dashboard and recruiter Key Metrics and would otherwise be false).
+- `LAUNCH_BOARD.md` (ticked), `ROADMAP.md`.
+
+### Decisions / task-rule applications
+- **Credential IDs NOT stored** — the `Certification` schema (`title/issuer/date/image/url`) has no ID field, and the task forbids schema changes (rule 7). Recorded here should the owner want an ID field later (schema + UI change).
+- **Dates stored verbatim** ("July 21, 2026") — the UI renders `date` raw in the mono badge; no format invented. Java cert date left `""` → badge hidden by the existing guard.
+- **Ordering = data order** (the section renders the array as-is): dated certs newest-first, undated last, per the task.
+
+### Validation
+- **`npm run lint`** → exit 0 ✅ · **`npm run build`** → exit 0; 12 routes ✅
+- **Prerendered checks:** homepage section shows exactly the 3 titles in order with both dates, 3 "View credential" links (correct hrefs, `target="_blank" rel="noopener noreferrer"`), Award placeholder panels (no broken images); recruiter Certifications shows all 3; "AWS Certified" absent from both pages; metric **3** on both surfaces. ✅
+
+## 41. Sprint X.X — Certification Issuer Logos (2026-08-21)
+
+**Scope:** replace the generic Award icon in cert-card headers with issuer logos, data-driven with graceful fallback. **Status: ✅ complete — repo green. Logo assets provided by the owner and verified on disk.**
+
+### Files modified (5)
+- `src/types/common.ts` — `Certification` gains optional `logo?: string` (additive; no breaking change).
+- `src/data/certifications.json` — `logo` on all 3 certs: IBM ×2 → `/images/certifications/ibm.svg`, GeeksforGeeks → `/images/certifications/geeksforgeeks.svg` (owner-supplied files, present).
+- `src/sections/Certifications.tsx` — visual area priority: certificate `image` (unchanged) → **issuer logo** → Award fallback. Logo renders via `next/image` `fill` + `object-contain` in an `h-20` (80px, within the 70–90px spec) centered box with `px-10` whitespace — never cropped or stretched. `imageExists()` widened to accept `undefined` and guards the logo at build time, so a missing file falls back to the Award icon automatically.
+- `LAUNCH_BOARD.md` (assets item annotated), `ROADMAP.md`.
+
+### Design decisions
+- **Light plate behind logos (`bg-white`), both themes** — required to support the logos: IBM's official mark is fill `#000000` and would vanish on the dark theme's muted panel; recoloring/inverting brand marks is off-brand. The plate is the standard "brand asset box" pattern; the Award fallback panel keeps its original `bg-muted/50`.
+- **Fully data-driven:** the component only checks `cert.logo` existence — zero issuer-name conditionals; any future cert opts in via JSON alone.
+- **Accessibility:** logo `alt` = issuer name (per task); the fallback panel's decorative icon stays `aria-hidden`.
+- **Recruiter view untouched** (its compact, image-free cards are an unrelated section per task rule 11).
+
+### Validation
+- **`npm run lint`** → exit 0 ✅ · **`npm run build`** → exit 0; 12 routes ✅
+- **Prerendered checks:** 3 logo `<img>` tags (2× ibm.svg, 1× geeksforgeeks.svg), each with issuer-name alt and `object-contain`, on 3 light plates; zero Award icons in the section (all certs have logos); fallback branch verified present in code for future logo-less certs. ✅
+
+## 42. Documentation Synchronization — Pre-Relaunch (2026-08-21)
+
+**Scope:** documentation only — reconcile every doc with the repository after the launch-preparation work (§§31–41). No application code touched. **Status: ✅ complete.**
+
+### Objective
+A brand-new Claude session reading `CLAUDE_START.md` (+ `ROADMAP.md` + `LAUNCH_BOARD.md`) must be able to resume with full, accurate context: what shipped during launch prep, what remains, what's owner-blocked, and which caveats matter.
+
+### Files updated (7)
+- `CLAUDE_START.md` — header doc-map now includes `LAUNCH_BOARD.md`; §2 rewritten for the current state (Architecture Viewer complete, Sprint 1/certs/Sprint 2 shipped, 12 routes, launch-prep phase); §4 present/absent lists corrected; §8 roadmap summary rebuilt with safe-next-tasks vs owner-blocked split **plus a new "Known caveats" list** (metadata merge semantics, parent-openGraph replacement, dead `EXTERNAL_URLS`, contact-data duplication, viewer prop width, IBM black-logo plate); §9/§10 now direct sessions to the launch board.
+- `ROADMAP.md` — Current Milestone → launch-prep phase; Next Milestones rebuilt from the launch board (Sprint 2 remainder, owner content, Sprint 3/4); Phase 6 marked in-progress with shipped items ticked. All completed history preserved.
+- `IMPLEMENTATION_STATUS.md` — header + TL;DR replaced with the current state (original TL;DR preserved as marked history); this §42 entry appended. §§31–41 were written incrementally at implementation time and were verified accurate.
+- `LAUNCH_BOARD.md` — status-at-a-glance summary added up top (Completed / In Progress / Blocked-owner / Deferred / Remaining); all item ticks verified against the repo.
+- `DECISIONS.md` — ADR-012 (SEO surface strategy: robots allow-all + page-level noindex, sitemap from `getProjectSlugs`, no `lastModified`), ADR-013 (OG image generation + shared-image-in-`createMetadata` + the merge fix), ADR-014 (JSON-LD: centralized Person+WebSite `@graph`, field-emission policy). Open Confirmations updated (email/resume resolved; ADR-003 accent question still open).
+- `README.md` — Create-Next-App boilerplate replaced with a real project overview (stack, structure, doc map, commands). First real content since scaffold.
+- `PROJECT_CONTEXT.md` — surgical corrections only: owner-facts block updated (real email/LinkedIn/resume, certs 1→3, graduation + target roles added) and the 2026-07-11 "Current state" section banner-marked as a superseded historical snapshot pointing to `CLAUDE_START.md` §2 + `LAUNCH_BOARD.md`. Architecture content untouched.
+
+### Verification (repo ↔ docs)
+- Route table (12), file tree (viewer feature, SEO routes, resume.pdf, cert logos), data values (email, LinkedIn, graduation, certs ×3, timeline ×10 events, impact statements) all cross-checked against the docs during this pass — no doc claims a feature that doesn't exist; no shipped feature is undocumented.
+- Repo untouched by this pass except documentation files; `npm run lint` / `npm run build` state unchanged from §41 (green, 12 routes).
 
 ## 7. See Also
 

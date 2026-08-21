@@ -80,6 +80,8 @@ export function Hero() {
         <EngineeringStatusPanel
           availability={status.availability}
           location={status.location}
+          graduation={status.graduation}
+          seeking={status.targetRoles.join(" · ")}
           focus={mission.learning}
           building={mission.building[0]}
           research={mission.exploring[0]}
@@ -92,12 +94,16 @@ export function Hero() {
 function EngineeringStatusPanel({
   availability,
   location,
+  graduation,
+  seeking,
   focus,
   building,
   research,
 }: {
   availability: string;
   location: string;
+  graduation: string;
+  seeking: string;
   focus: string[];
   building?: string;
   research?: string;
@@ -120,7 +126,10 @@ function EngineeringStatusPanel({
         <div className="grid grid-cols-2 gap-5">
           <StatusBlock label="Availability" value={availability} />
           <StatusBlock label="Location" value={location} />
+          <StatusBlock label="Graduation" value={graduation} />
         </div>
+
+        {seeking && <StatusBlock label="Seeking" value={seeking} />}
 
         <StatusBlock label="Current Focus">
           <ul className="flex flex-col gap-1.5">

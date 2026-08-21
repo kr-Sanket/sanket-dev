@@ -101,6 +101,24 @@ export default async function RecruiterPage() {
                 {hero.location}
               </dd>
             </div>
+            <div>
+              <dt className="font-mono text-[11px] tracking-widest text-muted-foreground uppercase">
+                Graduation
+              </dt>
+              <dd className="mt-1 text-sm font-medium text-foreground">
+                {hero.graduation}
+              </dd>
+            </div>
+            {hero.targetRoles.length > 0 && (
+              <div>
+                <dt className="font-mono text-[11px] tracking-widest text-muted-foreground uppercase">
+                  Seeking
+                </dt>
+                <dd className="mt-1 text-sm font-medium text-foreground">
+                  {hero.targetRoles.join(" · ")}
+                </dd>
+              </div>
+            )}
           </dl>
 
           <div className="mt-8 flex flex-wrap items-center gap-3">

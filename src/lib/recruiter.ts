@@ -42,6 +42,10 @@ export interface RecruiterHero {
   bio: string;
   availability: string;
   location: string;
+  /** Expected graduation, display-ready (e.g. "May 2027"). */
+  graduation: string;
+  /** Roles actively sought; the page renders them joined. */
+  targetRoles: string[];
   /** Prominent lead action (contact). */
   primaryCta: RecruiterCta;
   /** Secondary quick links; only those with a real destination are included. */
@@ -97,6 +101,8 @@ function buildHero(): RecruiterHero {
     bio,
     availability: status.availability,
     location: status.location,
+    graduation: status.graduation,
+    targetRoles: [...status.targetRoles],
     primaryCta: {
       label: "Get in touch",
       href: `mailto:${social.email}`,

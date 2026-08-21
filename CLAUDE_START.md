@@ -1,9 +1,10 @@
 # CLAUDE_START.md
 
 > **Single entry point for every Claude session on this repo.** Read this file +
-> `ROADMAP.md` and you have enough to work. For deeper detail, follow the links:
-> `ROADMAP.md` = roadmap source of truth · `IMPLEMENTATION_STATUS.md` = historical
-> per-milestone detail · `DECISIONS.md` = architectural history (ADRs) ·
+> `ROADMAP.md` + `LAUNCH_BOARD.md` and you have enough to work. For deeper detail:
+> `ROADMAP.md` = roadmap source of truth · `LAUNCH_BOARD.md` = **launch-prep board
+> (what's left before launch — current work lives here)** · `IMPLEMENTATION_STATUS.md`
+> = historical per-milestone detail · `DECISIONS.md` = architectural history (ADRs) ·
 > `PROJECT_CONTEXT.md` = extended architecture · `AGENTS.md` = hard tooling rules.
 
 ---
@@ -16,11 +17,12 @@
 
 ## 2. Current Progress
 
-- **Completed:** Foundation → Application Shell → **entire Homepage** (Hero, Engineering Dashboard, Featured Projects, Skills, Engineering Timeline, About, Leadership, Certifications, Contact) → SSG project detail pages (`/projects/[slug]`) → **GitHub Hub** (ISR) → **Coding Profiles** (ISR) → **Recruiter View** (`/recruiter`, `noindex`, 5.3) → **Project Mentor** (client-side hybrid search, 5.4). Theme switching + Recruiter/Developer view mode work end-to-end.
-- **Current milestone:** *(none in progress)* — next up is the **Architecture Viewer**, the last Phase 4 unique feature. *Awaiting owner direction.*
-- **Approximate completion:** **~85–90%.** Homepage, both live integrations, the recruiter route, and the Project Mentor are done; what remains is the Architecture Viewer and Phase 6 polish/ship.
+- **Completed (build phases):** Foundation → Application Shell → **entire Homepage** (Hero, Engineering Dashboard, Featured Projects, Skills, Engineering Timeline, About, Leadership, Certifications, Contact) → SSG project detail pages (`/projects/[slug]`) → **GitHub Hub** (ISR) → **Coding Profiles** (ISR) → **Recruiter View** (`/recruiter`, `noindex`, 5.3) → **Project Mentor** (client-side hybrid search, 5.4) → **Architecture Viewer complete** (6.1 diagram foundation · 6.1.5 devops-api data authoring, 7 nodes/5 edges · 6.2 selection · 6.3 detail panel). Theme switching + Recruiter/Developer view mode work end-to-end.
+- **Completed (launch prep, 2026-08-21):** four product/engineering reviews (P1–P4, see §§ in `IMPLEMENTATION_STATUS.md`/`LAUNCH_BOARD.md`) → **Sprint 1 launch blockers**: real email (`kumarsanket.jsr82@gmail.com`), `public/resume.pdf` live, LinkedIn (`linkedin.com/in/sanket-kumar-515bb228a`), GitHub confirmed, graduation ("May 2027") + target roles in `siteConfig.status` (Hero panel + recruiter `<dl>`), honest impact statements for both research projects, site timeline refreshed to Aug 2026 (10 events) → **real certifications**: AWS placeholder removed, 3 real certs (2× IBM CEP with dates + credential URLs, GeeksforGeeks) with issuer-logo support (`logo` field + light-plate rendering, Award fallback), dashboard metric 1→3 → **Sprint 2 production/SEO**: `robots.ts`, `sitemap.ts`, custom `not-found.tsx`, build-generated OG + Twitter images (`ImageResponse`), site-wide JSON-LD (Person + WebSite), and a `createMetadata` merge-bug fix (see §7-adjacent caveats below).
+- **Current phase:** **launch preparation — `LAUNCH_BOARD.md` is the operational board.** Route table: 12 routes (`/`, 3 project pages, `/recruiter`, 404, robots, sitemap, OG image, Twitter image).
+- **Approximate completion:** **feature-complete; ~launch-ready pending LAUNCH_BOARD remainder** (favicons/manifest, analytics decision, domain confirmation, `GITHUB_TOKEN`, image assets, owner content; then Sprint 3 UX polish + Sprint 4 cleanup, which improve but don't block).
 
-> The `~52%` figure and Phase Matrix inside `IMPLEMENTATION_STATUS.md §1` are historical/stale — trust `ROADMAP.md` for current status.
+> The `~52%` figure and Phase Matrix inside `IMPLEMENTATION_STATUS.md §1` are historical/stale — trust `ROADMAP.md` + `LAUNCH_BOARD.md` for current status.
 
 ## 3. Current Architecture
 
@@ -47,9 +49,9 @@ src/
   types/        project, timeline, github, coding-profile, common
 ```
 
-**Now also present:** `features/project-mentor/` (MentorChat + SearchEngine + tfidf + buildIndex), `app/recruiter/page.tsx`, `lib/recruiter.ts`, `lib/scroll.ts` + shared `HashLink`.
+**Now also present:** `features/project-mentor/` (MentorChat + SearchEngine + tfidf + buildIndex), `features/architecture-viewer/` (ArchitectureViewer client island + Canvas + Node + ConnectionLines + NodeDetailPanel + types), `app/recruiter/page.tsx`, `lib/recruiter.ts`, `lib/scroll.ts` + shared `HashLink`, `app/{not-found.tsx,robots.ts,sitemap.ts,opengraph-image.tsx,twitter-image.tsx}`, `public/resume.pdf`, `public/images/certifications/{ibm,geeksforgeeks}.svg`, and `LAUNCH_BOARD.md` (repo root).
 
-**Not yet present** (planned): `features/architecture-viewer/`, `app/{not-found,sitemap,robots}`, `src/hooks/`, shared `AnimatedCounter`/`ScrollReveal`, `public/images/**` + `resume.pdf`.
+**Not yet present** (planned): `src/hooks/`, shared `AnimatedCounter`/`ScrollReveal`, project image assets (`public/images/projects/**`), certificate photos, favicon set beyond `favicon.ico` / web manifest, tests + CI.
 
 ## 5. Engineering Rules
 
@@ -81,18 +83,27 @@ src/
 
 ## 8. Current Roadmap
 
-*(summary — `ROADMAP.md` is the source of truth)*
+*(summary — `ROADMAP.md` + `LAUNCH_BOARD.md` are the sources of truth)*
 
-- **Completed:** Foundation, Application Shell, full Homepage (9 sections), Project detail pages, GitHub Hub, Coding Profiles, navigation flow (5.1.5), Recruiter View (5.3), Project Mentor (5.4), theme + view-mode toggles.
-- **Current:** *(none)* — awaiting owner direction.
-- **Next:** Architecture Viewer (last unique feature); move Coding Profiles up after GitHub Hub; shared `AnimatedCounter` + `ScrollReveal`.
-- **Future (Phase 6 polish & ship):** `not-found.tsx`, `sitemap.ts`, `robots.ts`, per-route OG images, real assets (`public/images/**`, `resume.pdf`), accessibility + performance pass, `lib/recruiter.ts` aggregation.
+- **Completed:** Foundation, Application Shell, full Homepage (9 sections), Project detail pages, GitHub Hub, Coding Profiles, navigation flow (5.1.5), Recruiter View (5.3), Project Mentor (5.4), **Architecture Viewer (6.1–6.3)**, theme + view-mode toggles, P1–P4 reviews, **Sprint 1 launch blockers** (contact funnel: email/resume/LinkedIn/GitHub · graduation + target roles · research-project impact · timeline refresh), **real certifications + issuer logos**, **Sprint 2 SEO/production** (robots, sitemap, 404, OG/Twitter images, JSON-LD, metadata merge fix).
+- **Current:** launch preparation — work items live on `LAUNCH_BOARD.md`.
+- **Next (safe tasks needing no owner input):** favicon set + web manifest; Sprint 3 UX polish items (project-page reorder + recruiterSummary strip + closing CTA, empty-gallery/mentor handling, viewer affordance, recruiter tweaks); Sprint 4 cleanup (tests + CI, JSON build validation, `lib/format.ts` + icon-map extraction, narrow viewer client prop, remove `motion`/`EXTERNAL_URLS`, contact-data consolidation, `.env.example`); Coding Profiles homepage reorder.
+- **Blocked on owner:** domain confirmation (`https://sanket.dev`), analytics yes/no, `GITHUB_TOKEN` in deploy env, project/cert image assets, developer overviews + fresh milestones for the two research projects, §28 architecture questionnaire, coding-profile usernames.
+- **Then:** Sprint 5 launch (deploy, production verification, Lighthouse, v1.0 tag).
+
+### Known caveats discovered during implementation
+- **`createMetadata` merge semantics:** the helper destructures `openGraph`/`twitter` out of overrides and merges them key-by-key — the old top-level spread silently replaced the whole `openGraph` (project pages lost `og:site_name` for weeks). Don't reintroduce a blanket `...overrides`.
+- **Next metadata resolution replaces parent `openGraph` wholesale** when a child exports its own metadata — that's why the shared OG image is declared in `createMetadata`, not only via the file convention.
+- **`EXTERNAL_URLS` in `lib/constants.ts` is dead and stale** (old LinkedIn URL, zero consumers) — slated for removal in Sprint 4; don't use it.
+- **Contact data is duplicated** between `siteConfig.social` and `contact.json` — update both in lockstep until the Sprint 4 consolidation.
+- **`ArchitectureViewer` receives the full `Project`** as a client prop (payload duplication) — narrowing is a Sprint 4 item.
+- **IBM's logo SVG is pure black** — cert-card logos render on a light plate in both themes by design; don't "fix" it to a muted panel.
 
 ## 9. Standard Workflow
 
 Every milestone follows the same loop:
 
-1. **Read first:** `CLAUDE_START.md` (this file) + `ROADMAP.md`. Consult `IMPLEMENTATION_STATUS.md` / `DECISIONS.md` only for the specific area you're touching.
+1. **Read first:** `CLAUDE_START.md` (this file) + `ROADMAP.md` + `LAUNCH_BOARD.md` (during launch prep, the board defines the work). Consult `IMPLEMENTATION_STATUS.md` / `DECISIONS.md` only for the specific area you're touching.
 2. **Inspect the repo:** the relevant `sections/`, `features/`, `components/`, `data/`, `types/`, and any Next.js 16 doc under `node_modules/next/dist/docs/` for route/metadata work.
 3. **Health check (baseline):** confirm `npm run lint` and `npm run build` are green *before* starting, and review `git status` for uncommitted work.
 4. **Implement:** narrow scope to the one milestone. Reuse existing components; keep content in JSON; Server Components by default; follow the Engineering + Design rules above. No architecture changes without an ADR.
@@ -105,11 +116,12 @@ Every milestone follows the same loop:
 > Paste this into any new Claude session:
 
 ```
-We are continuing work on "sanket.dev", an existing production project.
+We are continuing work on "sanket.dev", an existing production project in its
+launch-preparation phase.
 
-First, read CLAUDE_START.md and ROADMAP.md to rebuild context. Consult
-IMPLEMENTATION_STATUS.md (history), DECISIONS.md (ADRs), and PROJECT_CONTEXT.md
-only for the area you're touching.
+First, read CLAUDE_START.md, ROADMAP.md, and LAUNCH_BOARD.md to rebuild context.
+Consult IMPLEMENTATION_STATUS.md (history), DECISIONS.md (ADRs), and
+PROJECT_CONTEXT.md only for the area you're touching.
 
 This is Next.js 16 (not 15) with shadcn on Base UI — read
 node_modules/next/dist/docs/ before writing any route/layout/metadata code.

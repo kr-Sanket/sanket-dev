@@ -5,7 +5,7 @@ import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ViewModeProvider } from "@/components/providers/ViewModeProvider";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { createMetadata } from "@/lib/metadata";
+import { createMetadata, getStructuredDataJson } from "@/lib/metadata";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -33,6 +33,11 @@ export default function RootLayout({
       className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
+        {/* Site-wide JSON-LD (Person + WebSite) — single source, one block. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: getStructuredDataJson() }}
+        />
         <ThemeProvider>
           <ViewModeProvider>
             <Navbar />

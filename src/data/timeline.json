@@ -50,6 +50,38 @@
       "icon": "shield",
       "relatedProject": "adaptive-cyber-defense",
       "status": "research"
+    },
+    {
+      "date": "2026-06",
+      "type": "project-start",
+      "title": "Portfolio Platform — sanket.dev",
+      "description": "Started building this engineering showcase platform — Next.js 16, data-driven, zero-database architecture",
+      "icon": "rocket",
+      "relatedProject": null
+    },
+    {
+      "date": "2026-07",
+      "type": "milestone",
+      "title": "Portfolio Homepage & Live Integrations",
+      "description": "All nine homepage sections shipped, with SSG project pages and ISR-cached GitHub integration",
+      "icon": "check-circle",
+      "relatedProject": null
+    },
+    {
+      "date": "2026-07",
+      "type": "milestone",
+      "title": "Recruiter View & Project Mentor Shipped",
+      "description": "Private recruiter summary page, plus a client-side hybrid-search Q&A mentor (Fuse.js + TF-IDF, no external AI) on every project page",
+      "icon": "check-circle",
+      "relatedProject": null
+    },
+    {
+      "date": "2026-08",
+      "type": "milestone",
+      "title": "Architecture Viewer Shipped",
+      "description": "Interactive architecture diagrams with node selection and a detail panel, rendered entirely from project data",
+      "icon": "check-circle",
+      "relatedProject": null
     }
   ]
 }

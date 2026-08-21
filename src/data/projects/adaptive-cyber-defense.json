@@ -41,7 +41,7 @@
     "fallback": "I don't have a specific answer for that yet — this project is in the research phase and its knowledge base is still being built."
   },
   "recruiterSummary": {
-    "impact": "TODO: add measurable impact once available",
+    "impact": "Investigates how machine learning can help network defenses adapt to evolving threats",
     "outcome": "AI-powered adaptive cyber defense",
     "skills": ["Python", "Machine Learning", "Network Security"]
   }
